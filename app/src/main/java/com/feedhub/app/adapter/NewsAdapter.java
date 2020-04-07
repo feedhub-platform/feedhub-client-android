@@ -1,6 +1,8 @@
 package com.feedhub.app.adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -8,10 +10,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import com.feedhub.app.R;
+import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.current.BaseAdapter;
 import com.feedhub.app.current.BaseHolder;
 import com.feedhub.app.item.News;
 import com.makeramen.roundedimageview.RoundedImageView;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -32,6 +36,9 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
 
     class ItemHolder extends BaseHolder {
 
+        private final int MAX_TITLE_LENGTH = 100;
+        private final int MAX_BODY_LENGTH = 250;
+
         @BindView(R.id.newsTitle)
         TextView title;
 
@@ -40,6 +47,9 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
 
         @BindView(R.id.newsPicture)
         RoundedImageView picture;
+
+        @BindView(R.id.newsWidePicture)
+        RoundedImageView widePicture;
 
         ItemHolder(@NonNull View v) {
             super(v);
@@ -51,11 +61,50 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         public void bind(int position) {
             News item = getItem(position);
 
-            title.setText(item.title);
+            String sTitle = item.title;
+            sTitle = sTitle.length() > MAX_TITLE_LENGTH ? sTitle.substring(0, MAX_TITLE_LENGTH - 1) + "..." : sTitle;
 
-            body.setText(item.body);
+            title.setText(sTitle);
 
-            //TODO: load picture
+            String sBody = item.body;
+            sBody = sBody.length() > MAX_BODY_LENGTH ? sBody.substring(0, MAX_BODY_LENGTH - 1) + "..." : sBody;
+
+            body.setText(sBody);
+
+            String sPicture = item.picture;
+
+            if (TextUtils.isEmpty(sPicture)) {
+                widePicture.setVisibility(View.GONE);
+                widePicture.setImageDrawable(null);
+
+                picture.setVisibility(View.GONE);
+                picture.setImageDrawable(null);
+            } else {
+                new Thread(() -> {
+                    try {
+                        Bitmap bitmap = Picasso.get().load(sPicture).get();
+
+                        float h = bitmap.getHeight();
+                        float w = bitmap.getWidth();
+
+                        AppGlobal.handler.post(() -> {
+                            if (w / h > 1.5) {
+                                picture.setVisibility(View.GONE);
+                                widePicture.setVisibility(View.VISIBLE);
+
+                                widePicture.setImageBitmap(bitmap);
+                            } else {
+                                picture.setVisibility(View.VISIBLE);
+                                widePicture.setVisibility(View.GONE);
+
+                                picture.setImageBitmap(bitmap);
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+            }
         }
     }
 }

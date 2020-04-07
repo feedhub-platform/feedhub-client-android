@@ -14,45 +14,59 @@
         app:cardElevation="4dp"
         app:cardUseCompatPadding="true">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?android:selectableItemBackground">
+            android:orientation="vertical">
 
             <com.makeramen.roundedimageview.RoundedImageView
-                android:id="@+id/newsPicture"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:layout_alignParentEnd="true"
-                android:layout_margin="16dp"
-                android:clickable="false"
-                android:focusable="false"
-                android:src="?colorAccent"
-                app:riv_corner_radius="14dp" />
-
-            <LinearLayout
+                android:id="@+id/newsWidePicture"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toStartOf="@+id/newsPicture"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_height="120dp"
+                android:scaleType="centerCrop"
+                android:src="?colorAccent" />
 
-                <TextView
-                    android:id="@+id/newsTitle"
-                    android:layout_width="wrap_content"
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:selectableItemBackground">
+
+                <com.makeramen.roundedimageview.RoundedImageView
+                    android:id="@+id/newsPicture"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_margin="16dp"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:src="?colorAccent"
+                    app:riv_corner_radius="14dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="?android:textAppearanceMedium"
-                    android:textColor="?android:textColorPrimary"
-                    tools:text="News Title" />
+                    android:layout_toStartOf="@+id/newsPicture"
+                    android:orientation="vertical"
+                    android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/newsBody"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    tools:text="News Body" />
+                    <TextView
+                        android:id="@+id/newsTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:textAppearanceMedium"
+                        android:textColor="?android:textColorPrimary"
+                        tools:text="News Title" />
 
-            </LinearLayout>
-        </RelativeLayout>
+                    <TextView
+                        android:id="@+id/newsBody"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        tools:text="News Body" />
+
+                </LinearLayout>
+            </RelativeLayout>
+        </LinearLayout>
+
     </androidx.cardview.widget.CardView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

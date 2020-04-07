@@ -1,8 +1,9 @@
 package com.feedhub.app.activity;
 
 import android.os.Bundle;
+import android.view.Gravity;
+import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,17 +13,24 @@ import com.feedhub.app.R;
 import com.feedhub.app.adapter.NewsAdapter;
 import com.feedhub.app.common.AppDatabase;
 import com.feedhub.app.common.AppGlobal;
+import com.feedhub.app.current.BaseActivity;
 import com.feedhub.app.dao.NewsDao;
 import com.feedhub.app.item.News;
+import com.feedhub.app.net.HttpRequest;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicReference;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener {
+public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener {
+
+    private static final String FILE_URL = "https://melod1n.do.am/data.json";
 
     @BindView(R.id.refreshLayout)
     SwipeRefreshLayout refreshLayout;
@@ -67,34 +75,65 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         AppDatabase database = AppGlobal.database;
         NewsDao newsDao = database.newsDao();
 
-        AtomicReference<ArrayList<News>> values = new AtomicReference<>(new ArrayList<>());
+//        AtomicReference<ArrayList<News>> values = new AtomicReference<>(new ArrayList<>());
+
+        final Random random = new Random();
 
         new Thread(() -> {
-            values.set(new ArrayList<>(newsDao.getAll()));
+            try {
+                JSONObject root = new JSONObject(HttpRequest.get("https://d62ebdf3.eu.ngrok.io/news").asString());
 
-            Random random = new Random();
+                JSONObject response = root.optJSONObject("response");
+                JSONArray items = response.optJSONArray("items");
 
-            if (values.get().isEmpty() || fromRefresh) {
-                if (!values.get().isEmpty()) {
-                    newsDao.clear();
-                    values.get().clear();
+//                JSONArray pictures = root.optJSONArray("pictures");
+//                JSONArray titles = root.optJSONArray("titles");
+//                JSONArray bodies = root.optJSONArray("bodies");
+
+                final ArrayList<News> news = new ArrayList<>();
+
+                for (int i = 0; i < items.length(); i++) {
+                    news.add(new News(items.optJSONObject(i)));
+//                    News n = new News();
+//                    n.id = i;
+//                    n.picture = pictures.optString(random.nextInt(4));
+//                    n.title = titles.optString(random.nextInt(4));
+//                    n.body = bodies.optString(random.nextInt(4));
+
+//                    news.add(n);
                 }
 
-                for (int i = 0; i < random.nextInt(100); i++) {
-                    News news = new News("Title " + (i + 1), "Body " + (i + 1), null);
-                    news.id = i;
+                runOnUiThread(() -> {
+                    createAdapter(news);
 
-                    values.get().add(news);
-                    newsDao.insert(news);
-                }
-            }
-
-            runOnUiThread(() -> {
-                createAdapter(values.get());
-
-                if (refreshLayout.isRefreshing())
                     refreshLayout.setRefreshing(false);
-            });
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+//            values.set(new ArrayList<>(newsDao.getAll()));
+
+//            if (values.get().isEmpty() || fromRefresh) {
+//                if (!values.get().isEmpty()) {
+//                    newsDao.clear();
+//                    values.get().clear();
+//                }
+//
+//                for (int i = 0; i < random.nextInt(100); i++) {
+//                    News news = new News("Title " + (i + 1), "Body " + (i + 1), null);
+//                    news.id = i;
+//
+//                    values.get().add(news);
+//                    newsDao.insert(news);
+//                }
+//            }
+//
+//            runOnUiThread(() -> {
+//                createAdapter(values.get());
+//
+//                if (refreshLayout.isRefreshing())
+//                    refreshLayout.setRefreshing(false);
+//            });
         }).start();
     }
 
