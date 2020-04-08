@@ -76,7 +76,7 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
     }
 
     private void prepareRecyclerView() {
-        
+
         LinearLayoutManager manager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
 
         recyclerView.setHasFixedSize(true);

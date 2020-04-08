@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.SharedPreferences;
 import android.os.Handler;
 
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 import androidx.room.Room;
 
@@ -22,5 +23,7 @@ public class AppGlobal extends Application {
         database = Room.databaseBuilder(this, AppDatabase.class, "database").build();
 
         handler = new Handler(getMainLooper());
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
     }
 }

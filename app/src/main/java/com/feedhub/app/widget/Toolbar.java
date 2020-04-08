@@ -2,6 +2,7 @@ package com.feedhub.app.widget;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
@@ -9,8 +10,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.feedhub.app.R;
+import com.google.android.material.appbar.MaterialToolbar;
 
-public class Toolbar extends androidx.appcompat.widget.Toolbar {
+public class Toolbar extends MaterialToolbar {
 
     public Toolbar(Context context) {
         this(context, null);
@@ -18,8 +20,6 @@ public class Toolbar extends androidx.appcompat.widget.Toolbar {
 
     public Toolbar(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-
-        init();
     }
 
     private void init() {
@@ -38,11 +38,13 @@ public class Toolbar extends androidx.appcompat.widget.Toolbar {
 
     @Override
     public void setTitleTextColor(int color) {
-        setTitleTextColor(ColorStateList.valueOf(color));
+        ((TextView) findViewById(R.id.toolbarTitle)).setTextColor(color);
     }
 
     @Override
-    public void setTitleTextColor(@NonNull ColorStateList color) {
-        ((TextView) findViewById(R.id.toolbarTitle)).setTextColor(color);
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+
+        init();
     }
 }

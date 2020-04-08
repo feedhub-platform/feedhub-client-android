@@ -14,6 +14,9 @@ public class News {
     public String title;
     public String body;
     public String picture;
+    public String language;
+    public String originTitle;
+    public String originUrl;
 
     public News() {
     }
@@ -26,8 +29,15 @@ public class News {
 
     public News(JSONObject o) {
 //        this.id = o.optInt("id")
-        this.title = o.optString("title");
-        this.body = o.optString("description");
-        this.picture = o.optString("frontImageUrl");
+        title = o.optString("title");
+        body = o.optString("description");
+        picture = o.optString("frontImageUrl");
+        language = o.optString("language");
+
+        JSONObject origin = o.optJSONObject("origin");
+        if (origin != null) {
+            originTitle = origin.optString("title");
+            originUrl = origin.optString("url");
+        }
     }
 }
