@@ -39,6 +39,9 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         private final int MAX_TITLE_LENGTH = 100;
         private final int MAX_BODY_LENGTH = 250;
 
+        @BindView(R.id.newsRoot)
+        View root;
+
         @BindView(R.id.newsTitle)
         TextView title;
 
@@ -60,6 +63,8 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         @Override
         public void bind(int position) {
             News item = getItem(position);
+
+            root.setVisibility(View.INVISIBLE);
 
             String sTitle = item.title;
             sTitle = sTitle.length() > MAX_TITLE_LENGTH ? sTitle.substring(0, MAX_TITLE_LENGTH - 1) + "..." : sTitle;
@@ -99,9 +104,19 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
 
                                 picture.setImageBitmap(bitmap);
                             }
+
+                            root.setVisibility(View.VISIBLE);
+                            root.setAlpha(0);
+                            root.animate().alpha(1).setDuration(150).start();
                         });
                     } catch (Exception e) {
                         e.printStackTrace();
+
+                        AppGlobal.handler.post(() -> {
+                            root.setVisibility(View.VISIBLE);
+                            root.setAlpha(0);
+                            root.animate().alpha(1).setDuration(150).start();
+                        });
                     }
                 }).start();
             }

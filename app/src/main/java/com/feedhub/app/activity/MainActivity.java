@@ -1,10 +1,11 @@
 package com.feedhub.app.activity;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.widget.TextView;
+import android.view.Menu;
 
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -17,11 +18,11 @@ import com.feedhub.app.current.BaseActivity;
 import com.feedhub.app.dao.NewsDao;
 import com.feedhub.app.item.News;
 import com.feedhub.app.net.HttpRequest;
+import com.feedhub.app.widget.Toolbar;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -56,8 +57,18 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
         createTestList(false);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
     private void prepareToolbar() {
         setSupportActionBar(toolbar);
+
+        //чтобы текст не уезжал куда-то влево, костыль
+        Drawable someDrawable = getDrawable(R.drawable.ic_logo_placeholder);
+        getSupportActionBar().setLogo(someDrawable);
     }
 
     private void prepareRefreshLayout() {
@@ -81,7 +92,7 @@ public class MainActivity extends BaseActivity implements SwipeRefreshLayout.OnR
 
         new Thread(() -> {
             try {
-                JSONObject root = new JSONObject(HttpRequest.get("https://d62ebdf3.eu.ngrok.io/news").asString());
+                JSONObject root = new JSONObject(HttpRequest.get("https://6041dc15.eu.ngrok.io/news").asString());
 
                 JSONObject response = root.optJSONObject("response");
                 JSONArray items = response.optJSONArray("items");
