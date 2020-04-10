@@ -1,5 +1,6 @@
 package com.feedhub.app.dao;
 
+import androidx.annotation.NonNull;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -12,12 +13,13 @@ import java.util.List;
 
 @Dao
 public interface NewsDao {
- 
+
+   @NonNull
    @Query("SELECT * FROM news")
    List<News> getAll();
  
    @Query("SELECT * FROM news WHERE id = :id")
-   News getById(long id);
+   News getById(String id);
  
    @Insert
    void insert(News news);

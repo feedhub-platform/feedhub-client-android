@@ -42,16 +42,6 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         return new ItemHolder(view(R.layout.item_news, parent));
     }
 
-    private void openUrl(@NonNull String url) {
-        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
-                .addDefaultShareMenuItem()
-                .setToolbarColor(context.getColor(R.color.primary))
-                .setShowTitle(true)
-                .build();
-
-        customTabsIntent.launchUrl(context, Uri.parse(url));
-    }
-
     class ItemHolder extends BaseHolder {
 
         private final int MAX_TITLE_LENGTH = 100;
@@ -96,10 +86,6 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
             language.setText(item.language.toUpperCase());
 
             originTitle.setText(item.originTitle);
-
-            cardView.setOnClickListener(v -> {
-                openUrl(item.originUrl);
-            });
 
             String sTitle = item.title;
             sTitle = sTitle.length() > MAX_TITLE_LENGTH ? sTitle.substring(0, MAX_TITLE_LENGTH - 1) + "..." : sTitle;

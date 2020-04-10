@@ -1,5 +1,6 @@
 package com.feedhub.app.item;
 
+import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
@@ -8,8 +9,9 @@ import org.json.JSONObject;
 @Entity
 public class News {
 
+    @NonNull
     @PrimaryKey
-    public int id;
+    public String id = "";
 
     public String title;
     public String body;
@@ -28,7 +30,7 @@ public class News {
     }
 
     public News(JSONObject o) {
-//        this.id = o.optInt("id")
+        id = o.optString("id");
         title = o.optString("title");
         body = o.optString("description");
         picture = o.optString("frontImageUrl");

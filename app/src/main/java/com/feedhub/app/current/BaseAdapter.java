@@ -65,32 +65,44 @@ public abstract class BaseAdapter<T, VH extends BaseHolder>
         return inflater.inflate(resId, viewGroup, false);
     }
 
-    protected T getItem(int position) {
+    public T getItem(int position) {
         return values.get(position);
     }
 
-    protected void remove(int index) {
+    public void remove(int index) {
         values.remove(index);
     }
 
-    protected void remove(T item) {
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
+
+    public void remove(T item) {
         values.remove(item);
     }
 
-    protected void add(T item) {
+    public void add(T item) {
         values.add(item);
     }
 
-    protected void add(int index, T item) {
+    public void add(int index, T item) {
         values.add(index, item);
     }
 
-    protected void set(int index, T item) {
+    public void set(int index, T item) {
         values.set(index, item);
     }
 
-    protected void clear() {
+    public void clear() {
         values.clear();
+    }
+
+    public void addAll(ArrayList<T> values) {
+        this.values.addAll(values);
+    }
+
+    public void addAll(int index, ArrayList<T> values) {
+        this.values.addAll(index, values);
     }
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
