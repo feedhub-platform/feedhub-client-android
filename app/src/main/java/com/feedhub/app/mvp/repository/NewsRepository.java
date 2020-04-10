@@ -11,6 +11,7 @@ import com.feedhub.app.item.News;
 import com.feedhub.app.mvp.contract.BaseContract;
 import com.feedhub.app.net.HttpRequest;
 import com.feedhub.app.util.ArrayUtils;
+import com.feedhub.app.util.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,7 +22,7 @@ import java.util.Objects;
 
 public class NewsRepository extends BaseContract.Repository<News> {
 
-    private final static String LOAD_URL = "";
+    private final static String LOAD_URL = Constants.URL;
 
     private NewsDao newsDao = AppGlobal.database.newsDao();
 

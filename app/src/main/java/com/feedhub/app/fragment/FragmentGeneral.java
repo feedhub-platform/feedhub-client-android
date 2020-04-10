@@ -144,6 +144,8 @@ public class FragmentGeneral extends BaseFragment implements BaseContract.View<N
 
     @Override
     public void insertValues(int offset, int count, ArrayList<News> values, boolean isCache) {
+        if (getContext() == null) return;
+
         if (adapter == null) {
             adapter = new NewsAdapter(requireContext(), values);
             adapter.setOnItemClickListener(this);

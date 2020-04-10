@@ -96,7 +96,7 @@
                         android:id="@+id/newsOriginTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:chipIcon="@drawable/ic_assessment"
+                        app:chipIcon="@drawable/ic_link"
                         app:chipIconTint="?android:textColorPrimary"
                         tools:text="vk.com" />
 
