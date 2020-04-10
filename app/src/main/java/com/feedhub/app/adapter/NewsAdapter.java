@@ -1,19 +1,27 @@
 package com.feedhub.app.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.browser.customtabs.CustomTabsCallback;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsSession;
 
 import com.feedhub.app.R;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.current.BaseAdapter;
 import com.feedhub.app.current.BaseHolder;
 import com.feedhub.app.item.News;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.chip.Chip;
 import com.makeramen.roundedimageview.RoundedImageView;
 import com.squareup.picasso.Picasso;
 
@@ -37,10 +45,13 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
     class ItemHolder extends BaseHolder {
 
         private final int MAX_TITLE_LENGTH = 100;
-        private final int MAX_BODY_LENGTH = 250;
+        private final int MAX_BODY_LENGTH = 400;
 
         @BindView(R.id.newsRoot)
         View root;
+
+        @BindView(R.id.newsCard)
+        MaterialCardView cardView;
 
         @BindView(R.id.newsTitle)
         TextView title;
@@ -54,6 +65,12 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         @BindView(R.id.newsWidePicture)
         RoundedImageView widePicture;
 
+        @BindView(R.id.newsLanguage)
+        Chip language;
+
+        @BindView(R.id.newsOriginTitle)
+        Chip originTitle;
+
         ItemHolder(@NonNull View v) {
             super(v);
 
@@ -65,6 +82,10 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
             News item = getItem(position);
 
             root.setVisibility(View.INVISIBLE);
+
+            language.setText(item.language.toUpperCase());
+
+            originTitle.setText(item.originTitle);
 
             String sTitle = item.title;
             sTitle = sTitle.length() > MAX_TITLE_LENGTH ? sTitle.substring(0, MAX_TITLE_LENGTH - 1) + "..." : sTitle;
