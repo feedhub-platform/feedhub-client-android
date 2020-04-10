@@ -1,14 +1,12 @@
 name: Android CI
 
 on:
-  push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
 
 jobs:
   build:
-
+    name: Build & Publish APK
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +21,7 @@ jobs:
       run: ./gradlew build
     - name: Build debug APK
       run: ./gradlew assembleDebug
-    - name: Releasing using Hub
+    - name: Release APK
       uses: ShaunLWM/action-release-debugapk@master
       env:
         GITHUB_TOKEN: ${{ secrets.TOKEN }}
