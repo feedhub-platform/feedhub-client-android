@@ -1,19 +1,13 @@
 package com.feedhub.app.adapter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.browser.customtabs.CustomTabsCallback;
-import androidx.browser.customtabs.CustomTabsClient;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.browser.customtabs.CustomTabsSession;
 
 import com.feedhub.app.R;
 import com.feedhub.app.common.AppGlobal;
@@ -81,8 +75,6 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         public void bind(int position) {
             News item = getItem(position);
 
-            root.setVisibility(View.INVISIBLE);
-
             language.setText(item.language.toUpperCase());
 
             originTitle.setText(item.originTitle);
@@ -99,6 +91,8 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
 
             String sPicture = item.picture;
 
+            widePicture.setVisibility(View.VISIBLE);
+
             if (TextUtils.isEmpty(sPicture)) {
                 widePicture.setVisibility(View.GONE);
                 widePicture.setImageDrawable(null);
@@ -110,34 +104,25 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
                     try {
                         Bitmap bitmap = Picasso.get().load(sPicture).get();
 
-                        float h = bitmap.getHeight();
-                        float w = bitmap.getWidth();
+//                        float h = bitmap.getHeight();
+//                        float w = bitmap.getWidth();
 
                         AppGlobal.handler.post(() -> {
-                            if (w / h > 1.5) {
-                                picture.setVisibility(View.GONE);
-                                widePicture.setVisibility(View.VISIBLE);
-
-                                widePicture.setImageBitmap(bitmap);
-                            } else {
-                                picture.setVisibility(View.VISIBLE);
-                                widePicture.setVisibility(View.GONE);
-
-                                picture.setImageBitmap(bitmap);
-                            }
-
-                            root.setVisibility(View.VISIBLE);
-                            root.setAlpha(0);
-                            root.animate().alpha(1).setDuration(150).start();
+                            widePicture.setImageBitmap(bitmap);
+//                            if (w / h > 1.5) {
+//                                picture.setVisibility(View.GONE);
+//                                widePicture.setVisibility(View.VISIBLE);
+//
+//                                widePicture.setImageBitmap(bitmap);
+//                            } else {
+//                                picture.setVisibility(View.VISIBLE);
+//                                widePicture.setVisibility(View.GONE);
+//
+//                                picture.setImageBitmap(bitmap);
+//                            }
                         });
                     } catch (Exception e) {
                         e.printStackTrace();
-
-                        AppGlobal.handler.post(() -> {
-                            root.setVisibility(View.VISIBLE);
-                            root.setAlpha(0);
-                            root.animate().alpha(1).setDuration(150).start();
-                        });
                     }
                 }).start();
             }

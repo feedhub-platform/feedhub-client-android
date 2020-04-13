@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -129,7 +130,9 @@ public class FragmentGeneral extends BaseFragment implements BaseContract.View<N
 
     @Override
     public void showErrorView(@Nullable Exception e) {
-
+        if (e != null) {
+            Toast.makeText(requireContext(), getString(R.string.cause_exception, e.toString()), Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -157,6 +160,10 @@ public class FragmentGeneral extends BaseFragment implements BaseContract.View<N
         if (offset > 0) {
             adapter.addAll(values);
             return;
+        }
+
+        if (recyclerView.getAdapter() == null) {
+            recyclerView.setAdapter(adapter);
         }
 
         adapter.changeItems(values);

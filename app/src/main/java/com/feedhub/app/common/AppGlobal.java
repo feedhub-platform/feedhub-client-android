@@ -3,6 +3,7 @@ package com.feedhub.app.common;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.os.Handler;
 
@@ -11,6 +12,10 @@ import androidx.preference.PreferenceManager;
 import androidx.room.Room;
 
 public class AppGlobal extends Application {
+
+    public static AppGlobal getInstance() {
+        return new AppGlobal();
+    }
 
     public static volatile AppDatabase database;
     public static volatile SharedPreferences preferences;
