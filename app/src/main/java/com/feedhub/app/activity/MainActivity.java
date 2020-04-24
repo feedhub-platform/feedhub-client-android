@@ -1,11 +1,14 @@
 package com.feedhub.app.activity;
 
-import android.graphics.drawable.Drawable;
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.feedhub.app.R;
@@ -14,11 +17,10 @@ import com.feedhub.app.fragment.FragmentFollowing;
 import com.feedhub.app.fragment.FragmentGeneral;
 import com.feedhub.app.fragment.FragmentHeadlines;
 import com.feedhub.app.fragment.FragmentSaved;
-import com.feedhub.app.widget.Toolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.makeramen.roundedimageview.RoundedImageView;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -28,28 +30,52 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     private final FragmentSaved fragmentSaved = new FragmentSaved();
 
     @BindView(R.id.toolbar)
-    Toolbar toolbar;
+    public Toolbar toolbar;
 
     @BindView(R.id.bottomNavigationView)
     BottomNavigationView navigationView;
+
+    @BindView(R.id.toolbarSearch)
+    LinearLayout toolbarSearch;
+
+    @BindView(R.id.toolbarAvatar)
+    RoundedImageView toolbarAvatar;
+
+    public MainActivity() {
+        super(true);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ButterKnife.bind(this);
-
         prepareToolbar();
         prepareBottomNavView();
 
         replaceFragment(fragmentGeneral);
-    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_main, menu);
-        return super.onCreateOptionsMenu(menu);
+        toolbarSearch.setOnClickListener(v -> {
+
+        });
+
+        toolbarAvatar.setOnClickListener(v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+            String[] items = new String[]{
+                    getString(R.string.navigation_settings)
+            };
+
+            builder.setItems(items, (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        openSettingsScreen();
+                        break;
+                }
+            });
+
+            builder.create().show();
+        });
     }
 
     @Override
@@ -73,12 +99,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     private void prepareToolbar() {
         setSupportActionBar(toolbar);
-
-        //чтобы текст не уезжал куда-то влево, костыль
-        Drawable someDrawable = getDrawable(R.drawable.ic_logo_placeholder);
-
-        if (getSupportActionBar() != null)
-            getSupportActionBar().setLogo(someDrawable);
     }
 
     private void prepareBottomNavView() {
@@ -92,6 +112,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     private void replaceFragment(Fragment fragment) {
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, fragment, fragment.getClass().getSimpleName()).commit();
+    }
+
+    private void openSettingsScreen() {
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 
 }

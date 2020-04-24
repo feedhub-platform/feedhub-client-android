@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.dao.NewsDao;
+import com.feedhub.app.fragment.FragmentSettings;
 import com.feedhub.app.item.News;
 import com.feedhub.app.mvp.contract.BaseContract;
 import com.feedhub.app.net.HttpRequest;
@@ -21,15 +22,17 @@ import java.util.Objects;
 
 public class NewsRepository extends BaseContract.Repository<News> {
 
-//    private final static String LOAD_URL = Constants.URL;
-
     private NewsDao newsDao = AppGlobal.database.newsDao();
 
     @Override
     public void loadValues(int offset, int count, @Nullable BaseContract.OnValuesLoadListener<News> listener) {
+        String serverUrl = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "");
+
+        if (serverUrl.trim().isEmpty()) return;
+
         TaskManager.execute(() -> {
             try {
-                JSONObject root = new JSONObject(HttpRequest.get("LOAD_URL").asString());
+                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
                 JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
                 JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
 
