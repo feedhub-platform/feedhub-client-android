@@ -14,6 +14,8 @@ import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.current.BaseAdapter;
 import com.feedhub.app.current.BaseHolder;
 import com.feedhub.app.item.News;
+import com.feedhub.app.util.AndroidUtils;
+import com.feedhub.app.util.StringUtils;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
 import com.makeramen.roundedimageview.RoundedImageView;
@@ -26,6 +28,8 @@ import butterknife.ButterKnife;
 
 public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
 
+    private static final int TYPE_HEADER = 2001;
+
     public NewsAdapter(@NonNull Context context, @NonNull ArrayList<News> values) {
         super(context, values);
     }
@@ -33,7 +37,45 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
     @NonNull
     @Override
     public ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_HEADER) return new HeaderHolder(generateEmptyView());
         return new ItemHolder(view(R.layout.item_news, parent));
+    }
+
+    @Override
+    public News getItem(int position) {
+        return super.getItem(position - 1);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == 0) return TYPE_HEADER;
+        return super.getItemViewType(position);
+    }
+
+    @Override
+    public int getItemCount() {
+        return super.getItemCount() + 1;
+    }
+
+    private View generateEmptyView() {
+        View view = new View(context);
+        view.setClickable(false);
+        view.setFocusable(false);
+        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AndroidUtils.px(56)));
+
+        return view;
+    }
+
+    class HeaderHolder extends ItemHolder {
+
+        HeaderHolder(@NonNull View v) {
+            super(v);
+        }
+
+        @Override
+        public void bind(int position) {
+            currentPosition = 0;
+        }
     }
 
     class ItemHolder extends BaseHolder {
@@ -68,25 +110,25 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         ItemHolder(@NonNull View v) {
             super(v);
 
+            if (this instanceof HeaderHolder) return;
+
             ButterKnife.bind(this, v);
         }
 
         @Override
         public void bind(int position) {
+            currentPosition = position;
+
             News item = getItem(position);
 
             language.setText(item.language.toUpperCase());
 
             originTitle.setText(item.originTitle);
 
-            String sTitle = item.title;
-            sTitle = sTitle.length() > MAX_TITLE_LENGTH ? sTitle.substring(0, MAX_TITLE_LENGTH - 1) + "..." : sTitle;
-
+            String sTitle = StringUtils.cutString(item.title, MAX_TITLE_LENGTH, true);
             title.setText(sTitle);
 
-            String sBody = item.body;
-            sBody = sBody.length() > MAX_BODY_LENGTH ? sBody.substring(0, MAX_BODY_LENGTH - 1) + "..." : sBody;
-
+            String sBody = StringUtils.cutString(item.body, MAX_BODY_LENGTH, true);
             body.setText(sBody);
 
             String sPicture = item.picture;

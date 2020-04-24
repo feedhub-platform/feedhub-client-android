@@ -21,9 +21,4 @@
         android:icon="@drawable/ic_notebook_outline"
         android:title="@string/navigation_saved" />
 
-    <item
-        android:id="@+id/navigationSettings"
-        android:icon="@drawable/ic_settings_outline"
-        android:title="@string/navigation_settings" />
-
 </menu>

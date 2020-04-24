@@ -12,4 +12,12 @@ public class AndroidUtils {
         return cm.getActiveNetworkInfo() != null && cm.getActiveNetworkInfo().isConnected();
     }
 
+    public static int px(float dp) {
+        return (int) (dp * AppGlobal.resources.getDisplayMetrics().density);
+    }
+
+    public static int dp(float px) {
+        return (int) (px / AppGlobal.resources.getDisplayMetrics().density);
+    }
+
 }

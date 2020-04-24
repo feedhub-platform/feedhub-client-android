@@ -2,5 +2,6 @@
 <resources>
     <color name="primary">#FFFFFF</color>
     <color name="primary_dark">#FFFFFF</color>
+    <color name="navigation_bar">@color/primary_dark</color>
     <color name="accent">#006064</color>
 </resources>

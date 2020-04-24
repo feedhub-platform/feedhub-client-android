@@ -4,18 +4,62 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
-    android:layout_height="?actionBarSize"
+    android:layout_height="56dp"
     android:background="?colorPrimary"
+    android:clickable="false"
+    android:focusable="false"
     app:contentInsetStart="0dp">
 
-    <TextView
-        android:id="@+id/toolbarTitle"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/google_sans_medium"
-        android:gravity="center"
-        android:textAppearance="?android:textAppearanceLarge"
-        android:textColor="?colorAccent"
-        tools:text="Some title" />
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/toolbarSearch"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="12dp"
+            android:background="?selectableItemBackgroundBorderless"
+            android:gravity="center">
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:clickable="false"
+                android:focusable="false"
+                android:src="@drawable/ic_search"
+                android:tint="?android:textColorPrimary" />
+
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/toolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_toStartOf="@+id/toolbarAvatar"
+            android:layout_toEndOf="@+id/toolbarSearch"
+            android:clickable="false"
+            android:focusable="false"
+            android:fontFamily="@font/google_sans_medium"
+            android:gravity="center"
+            android:textAppearance="?android:textAppearanceLarge"
+            android:textColor="?colorAccent"
+            tools:text="Some title" />
+
+        <com.makeramen.roundedimageview.RoundedImageView
+            android:id="@+id/toolbarAvatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="12dp"
+            android:src="?colorAccent"
+            app:riv_oval="true" />
+
+    </RelativeLayout>
 
 </com.feedhub.app.widget.Toolbar>

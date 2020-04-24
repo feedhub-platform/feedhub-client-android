@@ -16,9 +16,12 @@ public abstract class BaseAdapter<T, VH extends BaseHolder>
 
     public OnItemClickListener onItemClickListener;
     public OnItemLongClickListener onItemLongClickListener;
+
     protected Context context;
     protected ArrayList<T> values;
     protected LayoutInflater inflater;
+
+    public int currentPosition = -1;
 
     public BaseAdapter(@NonNull Context context, @NonNull ArrayList<T> values) {
         this.context = context;
@@ -36,6 +39,7 @@ public abstract class BaseAdapter<T, VH extends BaseHolder>
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
         holder.bind(position);
+        initListeners(holder, position);
     }
 
     private void initListeners(@NonNull VH holder, int position) {

@@ -17,6 +17,7 @@
 
         <activity
             android:name=".activity.MainActivity"
+            android:configChanges="orientation|density|screenSize"
             android:windowSoftInputMode="adjustResize">
 
             <intent-filter>
@@ -25,6 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".activity.SettingsActivity" />
     </application>
 
 </manifest>
