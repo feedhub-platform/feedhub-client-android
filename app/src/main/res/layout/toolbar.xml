@@ -4,10 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/toolbar"
     android:layout_width="match_parent"
-    android:layout_height="56dp"
+    android:layout_height="?actionBarSize"
     android:background="?colorPrimary"
-    android:clickable="false"
-    android:focusable="false"
     app:contentInsetStart="0dp">
 
     <RelativeLayout
@@ -16,7 +14,7 @@
         android:orientation="horizontal">
 
         <LinearLayout
-            android:id="@+id/toolbarSearch"
+            android:id="@+id/toolbarNavigation"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_centerVertical="true"
@@ -25,13 +23,14 @@
             android:gravity="center">
 
             <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/toolbarNavigationIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
                 android:clickable="false"
                 android:focusable="false"
-                android:src="@drawable/ic_search"
-                android:tint="?android:textColorPrimary" />
+                android:tint="?android:textColorPrimary"
+                tools:src="@drawable/ic_search" />
 
         </LinearLayout>
 
@@ -41,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:layout_toStartOf="@+id/toolbarAvatar"
-            android:layout_toEndOf="@+id/toolbarSearch"
+            android:layout_toEndOf="@+id/toolbarNavigation"
             android:clickable="false"
             android:focusable="false"
             android:fontFamily="@font/google_sans_medium"

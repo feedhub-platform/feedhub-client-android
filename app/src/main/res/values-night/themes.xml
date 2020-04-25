@@ -7,6 +7,8 @@
         <item name="android:navigationBarColor">@color/navigation_bar</item>
         <item name="dialogCornerRadius">8dp</item>
         <item name="android:windowBackground">?colorPrimary</item>
+        <item name="tabIndicatorColor">?android:textColorPrimary</item>
+        <item name="tabSelectedTextColor">?tabIndicatorColor</item>
     </style>
 
 </resources>

@@ -28,7 +28,7 @@ import butterknife.ButterKnife;
 
 public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
 
-    private static final int TYPE_HEADER = 2001;
+//    private static final int TYPE_HEADER = 2001;
 
     public NewsAdapter(@NonNull Context context, @NonNull ArrayList<News> values) {
         super(context, values);
@@ -37,46 +37,46 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
     @NonNull
     @Override
     public ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == TYPE_HEADER) return new HeaderHolder(generateEmptyView());
+//        if (viewType == TYPE_HEADER) return new HeaderHolder(generateEmptyView());
         return new ItemHolder(view(R.layout.item_news, parent));
     }
-
-    @Override
-    public News getItem(int position) {
-        return super.getItem(position - 1);
-    }
-
-    @Override
-    public int getItemViewType(int position) {
-        if (position == 0) return TYPE_HEADER;
-        return super.getItemViewType(position);
-    }
-
-    @Override
-    public int getItemCount() {
-        return super.getItemCount() + 1;
-    }
-
-    private View generateEmptyView() {
-        View view = new View(context);
-        view.setClickable(false);
-        view.setFocusable(false);
-        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AndroidUtils.px(56)));
-
-        return view;
-    }
-
-    class HeaderHolder extends ItemHolder {
-
-        HeaderHolder(@NonNull View v) {
-            super(v);
-        }
-
-        @Override
-        public void bind(int position) {
-            currentPosition = 0;
-        }
-    }
+//
+//    @Override
+//    public News getItem(int position) {
+//        return super.getItem(position - 1);
+//    }
+//
+//    @Override
+//    public int getItemViewType(int position) {
+//        if (position == 0) return TYPE_HEADER;
+//        return super.getItemViewType(position);
+//    }
+//
+//    @Override
+//    public int getItemCount() {
+//        return super.getItemCount() + 1;
+//    }
+//
+//    private View generateEmptyView() {
+//        View view = new View(context);
+//        view.setClickable(false);
+//        view.setFocusable(false);
+//        view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, AndroidUtils.px(56)));
+//
+//        return view;
+//    }
+//
+//    class HeaderHolder extends ItemHolder {
+//
+//        HeaderHolder(@NonNull View v) {
+//            super(v);
+//        }
+//
+//        @Override
+//        public void bind(int position) {
+//            currentPosition = 0;
+//        }
+//    }
 
     class ItemHolder extends BaseHolder {
 
@@ -110,7 +110,7 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         ItemHolder(@NonNull View v) {
             super(v);
 
-            if (this instanceof HeaderHolder) return;
+//            if (this instanceof HeaderHolder) return;
 
             ButterKnife.bind(this, v);
         }

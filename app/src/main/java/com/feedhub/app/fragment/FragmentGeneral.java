@@ -1,5 +1,7 @@
 package com.feedhub.app.fragment;
 
+import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,8 +10,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Toast;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
@@ -19,6 +23,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.feedhub.app.R;
 import com.feedhub.app.activity.MainActivity;
+import com.feedhub.app.activity.SettingsActivity;
 import com.feedhub.app.adapter.NewsAdapter;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.current.BaseFragment;
@@ -26,6 +31,7 @@ import com.feedhub.app.item.News;
 import com.feedhub.app.mvp.contract.BaseContract;
 import com.feedhub.app.mvp.presenter.NewsPresenter;
 import com.feedhub.app.util.AndroidUtils;
+import com.feedhub.app.util.ColorUtils;
 
 import java.util.ArrayList;
 
@@ -42,29 +48,14 @@ public class FragmentGeneral extends BaseFragment implements BaseContract.View<N
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
 
-    private LinearLayoutManager layoutManager;
-
     @Nullable
     private NewsAdapter adapter;
 
     @NonNull
     private NewsPresenter presenter;
 
-    private Toolbar toolbar;
-    private Window window;
-
-    private boolean isToolbarAnimating;
-
     public FragmentGeneral() {
         presenter = new NewsPresenter(this);
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        toolbar = ((MainActivity) requireActivity()).toolbar;
-        window = requireActivity().getWindow();
     }
 
     @Nullable
@@ -75,8 +66,10 @@ public class FragmentGeneral extends BaseFragment implements BaseContract.View<N
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
 
+        prepareToolbar();
         prepareRefreshLayout();
         prepareRecyclerView();
 
@@ -85,27 +78,40 @@ public class FragmentGeneral extends BaseFragment implements BaseContract.View<N
         if (AndroidUtils.hasConnection()) {
             loadValues();
         }
+    }
 
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                int firstPosition = layoutManager.findFirstVisibleItemPosition();
+    private void prepareToolbar() {
+        initToolbar(R.id.toolbar);
 
-                if (firstPosition > 0) {
-                    if (toolbar.getAlpha() == 0.85 || isToolbarAnimating) return;
-
-                    isToolbarAnimating = true;
-
-                    toolbar.animate().alpha(0.85f).setDuration(150).withEndAction(() -> isToolbarAnimating = false).start();
-                } else {
-                    if (toolbar.getAlpha() == 1 || isToolbarAnimating) return;
-
-                    isToolbarAnimating = true;
-
-                    toolbar.animate().alpha(1f).setDuration(150).withEndAction(() -> isToolbarAnimating = false).start();
-                }
-            }
+        toolbar.setNavigationClickListener(v -> {
         });
+        toolbar.setNavigationIcon(R.drawable.ic_search);
+        toolbar.setTitle(R.string.app_name);
+        toolbar.setAvatarClickListener(getAvatarClickListener());
+    }
+
+    private View.OnClickListener getAvatarClickListener() {
+        return v -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+
+            String[] items = new String[]{
+                    getString(R.string.navigation_settings)
+            };
+
+            builder.setItems(items, (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        openSettingsScreen();
+                        break;
+                }
+            });
+
+            builder.create().show();
+        };
+    }
+
+    private void openSettingsScreen() {
+        startActivity(new Intent(requireContext(), SettingsActivity.class));
     }
 
     private void loadCachedValues() {
@@ -129,16 +135,11 @@ public class FragmentGeneral extends BaseFragment implements BaseContract.View<N
 
     private void prepareRefreshLayout() {
         refreshLayout.setColorSchemeColors(AppGlobal.colorAccent);
-        refreshLayout.setProgressViewOffset(true, AndroidUtils.px(36), AndroidUtils.px(46));
-        refreshLayout.setProgressViewEndTarget(true, AndroidUtils.px(66));
         refreshLayout.setOnRefreshListener(this);
     }
 
     private void prepareRecyclerView() {
-        layoutManager = new LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false);
-
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false));
     }
 
     @Override
