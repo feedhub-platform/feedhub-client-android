@@ -26,17 +26,18 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
+public class HeadlineAdapter extends BaseAdapter<News, HeadlineAdapter.ItemHolder> {
 
-    public NewsAdapter(@NonNull Context context, @NonNull ArrayList<News> values) {
+    public HeadlineAdapter(@NonNull Context context, @NonNull ArrayList<News> values) {
         super(context, values);
     }
 
     @NonNull
     @Override
     public ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ItemHolder(view(R.layout.item_news, parent));
+        return new ItemHolder(view(R.layout.item_headline_item, parent));
     }
+
 
     class ItemHolder extends BaseHolder {
 
@@ -61,12 +62,6 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         @BindView(R.id.newsWidePicture)
         RoundedImageView widePicture;
 
-        @BindView(R.id.newsLanguage)
-        Chip language;
-
-        @BindView(R.id.newsOriginTitle)
-        Chip originTitle;
-
         ItemHolder(@NonNull View v) {
             super(v);
 
@@ -78,10 +73,6 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
             currentPosition = position;
 
             News item = getItem(position);
-
-            language.setText(item.language.toUpperCase());
-
-            originTitle.setText(item.originTitle);
 
             String sTitle = StringUtils.cutString(item.title, MAX_TITLE_LENGTH, true);
             title.setText(sTitle);

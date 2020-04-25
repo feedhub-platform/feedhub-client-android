@@ -134,7 +134,7 @@ public class FragmentGeneral extends BaseFragment implements BaseContract.View<N
     }
 
     private void prepareRefreshLayout() {
-        refreshLayout.setColorSchemeColors(AppGlobal.colorAccent);
+        refreshLayout.setColorSchemeResources(R.color.accent);
         refreshLayout.setOnRefreshListener(this);
     }
 
