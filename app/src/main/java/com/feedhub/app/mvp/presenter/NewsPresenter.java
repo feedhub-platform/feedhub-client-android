@@ -84,6 +84,7 @@ public class NewsPresenter implements BaseContract.Presenter<News> {
 
     @Override
     public void onValuesError(Exception e) {
+        view.showRefreshLayout(false);
         showList();
 
         post(() -> view.showErrorView(e));

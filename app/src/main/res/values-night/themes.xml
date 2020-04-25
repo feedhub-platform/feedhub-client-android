@@ -4,6 +4,7 @@
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primary_dark</item>
         <item name="colorAccent">@color/accent</item>
+        <item name="colorAccentAlpha">@color/accent_alpha</item>
         <item name="android:navigationBarColor">@color/navigation_bar</item>
         <item name="dialogCornerRadius">8dp</item>
         <item name="android:windowBackground">?colorPrimary</item>

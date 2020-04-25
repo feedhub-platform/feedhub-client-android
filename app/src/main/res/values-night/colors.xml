@@ -4,4 +4,5 @@
     <color name="primary_dark">#000000</color>
     <color name="navigation_bar">@color/primary_dark</color>
     <color name="accent">#4DB6AC</color>
+    <color name="accent_alpha">#D94DB6AC</color>
 </resources>
