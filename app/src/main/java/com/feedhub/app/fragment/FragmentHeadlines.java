@@ -1,8 +1,10 @@
 package com.feedhub.app.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -90,6 +92,7 @@ public class FragmentHeadlines extends BaseFragment {
         startActivity(new Intent(requireContext(), SettingsActivity.class));
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void prepareViewPager() {
         List<FragmentHeadlinesItem> fragments = new ArrayList<>();
 
@@ -97,6 +100,7 @@ public class FragmentHeadlines extends BaseFragment {
             fragments.add(FragmentHeadlinesItem.newInstance(title));
         }
 
+        viewPager.setUserInputEnabled(false);
         viewPager.setSaveEnabled(false);
         viewPager.setAdapter(new HeadlinesPagerAdapter(this, fragments));
     }
