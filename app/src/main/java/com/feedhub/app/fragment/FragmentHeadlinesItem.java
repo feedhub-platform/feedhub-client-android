@@ -95,6 +95,7 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     @SuppressLint("SetTextI18n")
     private void prepareChipGroup() {
         int chipCount = new Random().nextInt(10);
+        if (chipCount == 0) chipCount = 1;
 
         if (chipGroup.getChildCount() > 0) chipGroup.removeAllViews();
 
@@ -127,6 +128,9 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     }
 
     private void insertTestData() {
+        int headlinesCount = new Random().nextInt();
+        if (headlinesCount == 0) headlinesCount = 1;
+
         ArrayList<News> items = new ArrayList<>();
 
         for (int i = 0; i < new Random().nextInt(20); i++) {
