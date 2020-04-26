@@ -3,6 +3,8 @@
     <color name="primary">#FFFFFF</color>
     <color name="primary_dark">#FFFFFF</color>
     <color name="navigation_bar">@color/primary_dark</color>
-    <color name="accent">#006064</color>
-    <color name="accent_alpha">#D9006064</color>
+    <color name="accent">#0e5e43</color>
+    <color name="accent_alpha">#590E5E43</color>
+    <color name="old_accent">#006064</color>
+    <color name="old_accent_alpha">#80006064</color>
 </resources>

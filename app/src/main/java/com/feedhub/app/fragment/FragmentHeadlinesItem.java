@@ -1,16 +1,10 @@
 package com.feedhub.app.fragment;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,14 +15,19 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.feedhub.app.R;
 import com.feedhub.app.adapter.HeadlineAdapter;
 import com.feedhub.app.common.AppGlobal;
+import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.item.News;
-import com.feedhub.app.util.ColorUtils;
+import com.feedhub.app.item.Topic;
+import com.feedhub.app.net.HttpRequest;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import butterknife.BindView;
@@ -36,7 +35,7 @@ import butterknife.ButterKnife;
 
 public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener {
 
-    private String title;
+    private String category;
 
     @BindView(R.id.refreshLayout)
     SwipeRefreshLayout refreshLayout;
@@ -65,7 +64,7 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            title = getArguments().getString("title", "");
+            category = getArguments().getString("title", "");
         }
     }
 
@@ -94,19 +93,40 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
     @SuppressLint("SetTextI18n")
     private void prepareChipGroup() {
-        int chipCount = new Random().nextInt(10);
-        if (chipCount == 0) chipCount = 1;
-
         if (chipGroup.getChildCount() > 0) chipGroup.removeAllViews();
 
-        for (int i = 0; i < chipCount; i++) {
-            Chip chip = (Chip) getLayoutInflater().inflate(R.layout.fragment_headlines_item_chip, chipGroup, false);
-            chip.setId(i);
-            chip.setTag(i);
-            chip.setText("Chip #" + (i + 1));
+        ArrayList<Topic> items = new ArrayList<>();
 
-            chipGroup.addView(chip);
-        }
+        TaskManager.execute(() -> {
+            try {
+                String serverUrl = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/news/topics?category=" + category.toLowerCase();
+
+                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
+                JSONObject response = Objects.requireNonNull(root.optJSONArray("response")).optJSONObject(0);
+                JSONArray topics = Objects.requireNonNull(response.optJSONArray("topics"));
+
+                for (int i = 0; i < topics.length(); i++) {
+                    items.add(new Topic(topics.optJSONObject(i)));
+                }
+
+                AppGlobal.handler.post(() -> {
+                    for (int i = 0; i < items.size(); i++) {
+                        Topic topic = items.get(i);
+
+                        Chip chip = (Chip) getLayoutInflater().inflate(R.layout.fragment_headlines_item_chip, chipGroup, false);
+                        chip.setId(i);
+                        chip.setTag(topic.id);
+                        chip.setText(topic.title);
+
+                        chipGroup.addView(chip);
+                    }
+
+                    ((Chip) chipGroup.getChildAt(0)).setChecked(true);
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 
         chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == -1) {

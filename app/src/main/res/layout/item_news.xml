@@ -81,25 +81,19 @@
                 android:focusable="false">
 
                 <com.google.android.material.chip.Chip
+                    style="@style/AppTheme.Chip.Accent"
                     android:id="@+id/newsLanguage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="?android:windowBackground"
                     app:chipIcon="@drawable/ic_language"
-                    app:chipIconTint="?android:textColorPrimary"
-                    app:chipStrokeColor="?android:textColorSecondary"
-                    app:chipStrokeWidth="1dp"
                     tools:text="RU" />
 
                 <com.google.android.material.chip.Chip
+                    style="@style/AppTheme.Chip"
                     android:id="@+id/newsOriginTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:chipBackgroundColor="?android:windowBackground"
                     app:chipIcon="@drawable/ic_link"
-                    app:chipIconTint="?android:textColorPrimary"
-                    app:chipStrokeColor="?android:textColorSecondary"
-                    app:chipStrokeWidth="1dp"
                     tools:text="vk.com" />
 
             </com.google.android.material.chip.ChipGroup>

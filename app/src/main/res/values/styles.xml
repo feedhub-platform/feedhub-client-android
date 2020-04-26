@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="AppTheme.Tab" parent="Widget.MaterialComponents.TabLayout.PrimarySurface">
+        <item name="tabTextAppearance">@style/AppTheme.Tab.Text</item>
+        <item name="tabGravity">start</item>
+        <item name="tabIndicatorColor">?tabIndicatorColor</item>
+        <item name="tabIndicatorFullWidth">false</item>
+        <item name="tabMode">scrollable</item>
+        <item name="tabSelectedTextColor">?tabSelectedTextColor</item>
+    </style>
+
+    <style name="AppTheme.Tab.Text" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="textAllCaps">false</item>
+        <item name="fontFamily">@font/google_sans_medium</item>
+    </style>
+
+    <style name="AppTheme.Chip">
+        <item name="chipBackgroundColor">?android:windowBackground</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipIconTint">?android:textColorSecondary</item>
+        <item name="chipStrokeColor">?android:textColorSecondary</item>
+        <item name="android:textColor">?android:textColorSecondary</item>
+    </style>
+
+    <style name="AppTheme.Chip.Accent" parent="AppTheme.Chip">
+        <item name="chipIconTint">?colorAccent</item>
+        <item name="chipStrokeColor">?colorAccent</item>
+        <item name="android:textColor">?colorAccent</item>
+    </style>
+
+</resources>

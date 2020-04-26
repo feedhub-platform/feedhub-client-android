@@ -14,7 +14,6 @@ import java.util.List;
 @Dao
 public interface NewsDao {
 
-   @NonNull
    @Query("SELECT * FROM news")
    List<News> getAll();
  

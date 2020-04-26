@@ -26,7 +26,7 @@ public class NewsRepository extends BaseContract.Repository<News> {
 
     @Override
     public void loadValues(int offset, int count, @Nullable BaseContract.OnValuesLoadListener<News> listener) {
-        String serverUrl = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "");
+        String serverUrl = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/news";
 
         if (serverUrl.trim().isEmpty()) return;
 
