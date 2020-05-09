@@ -2,7 +2,9 @@ package com.feedhub.app.item;
 
 import org.json.JSONObject;
 
-public class Topic {
+import java.io.Serializable;
+
+public class Topic implements Serializable {
 
     public String id;
     public String title;

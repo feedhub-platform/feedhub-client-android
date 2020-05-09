@@ -35,7 +35,9 @@ import butterknife.ButterKnife;
 
 public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener {
 
-    private String category;
+    private String categoryTitle;
+    private String categoryId;
+    private ArrayList<Topic> topics;
 
     @BindView(R.id.refreshLayout)
     SwipeRefreshLayout refreshLayout;
@@ -48,11 +50,13 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
     private int lastCheckedId;
 
-    static FragmentHeadlinesItem newInstance(String title) {
+    public static FragmentHeadlinesItem newInstance(String id, String title, ArrayList<Topic> topics) {
         FragmentHeadlinesItem fragment = new FragmentHeadlinesItem();
 
         Bundle bundle = new Bundle();
         bundle.putString("title", title);
+        bundle.putString("id", id);
+        bundle.putSerializable("topics", topics);
 
         fragment.setArguments(bundle);
 
@@ -64,7 +68,9 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {
-            category = getArguments().getString("title", "");
+            categoryTitle = getArguments().getString("title", "");
+            categoryId = getArguments().getString("id", "");
+            topics = (ArrayList<Topic>) getArguments().getSerializable("topics");
         }
     }
 
@@ -95,38 +101,56 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     private void prepareChipGroup() {
         if (chipGroup.getChildCount() > 0) chipGroup.removeAllViews();
 
-        ArrayList<Topic> items = new ArrayList<>();
+        for (int i = 0; i < topics.size(); i++) {
+            Topic topic = topics.get(i);
 
-        TaskManager.execute(() -> {
-            try {
-                String serverUrl = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/news/topics?category=" + category.toLowerCase();
+            Chip chip = (Chip) getLayoutInflater().inflate(R.layout.fragment_headlines_item_chip, chipGroup, false);
+            chip.setId(i);
+            chip.setTag(topic.id);
+            chip.setText(topic.title);
 
-                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
-                JSONObject response = Objects.requireNonNull(root.optJSONArray("response")).optJSONObject(0);
-                JSONArray topics = Objects.requireNonNull(response.optJSONArray("topics"));
+            chipGroup.addView(chip);
+        }
 
-                for (int i = 0; i < topics.length(); i++) {
-                    items.add(new Topic(topics.optJSONObject(i)));
-                }
+        Chip chip = (Chip) chipGroup.getChildAt(0);
 
-                AppGlobal.handler.post(() -> {
-                    for (int i = 0; i < items.size(); i++) {
-                        Topic topic = items.get(i);
+        if (chip != null) chip.setChecked(true);
 
-                        Chip chip = (Chip) getLayoutInflater().inflate(R.layout.fragment_headlines_item_chip, chipGroup, false);
-                        chip.setId(i);
-                        chip.setTag(topic.id);
-                        chip.setText(topic.title);
-
-                        chipGroup.addView(chip);
-                    }
-
-                    ((Chip) chipGroup.getChildAt(0)).setChecked(true);
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+//        ArrayList<Topic> items = new ArrayList<>();
+//
+//        TaskManager.execute(() -> {
+//            try {
+//                String serverUrl =
+//                        AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
+//                                AppGlobal.preferences.getString(FragmentSettings.KEY_TOPICS_KEY, "") +
+//                                "?category=" + categoryId;
+//
+//                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
+//                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+//                JSONArray topics = Objects.requireNonNull(response.optJSONArray("topics").optJSONObject(0).optJSONArray("items"));
+//
+//                for (int i = 0; i < topics.length(); i++) {
+//                    items.add(new Topic(topics.optJSONObject(i)));
+//                }
+//
+//                AppGlobal.handler.post(() -> {
+//                    for (int i = 0; i < items.size(); i++) {
+//                        Topic topic = items.get(i);
+//
+//                        Chip chip = (Chip) getLayoutInflater().inflate(R.layout.fragment_headlines_item_chip, chipGroup, false);
+//                        chip.setId(i);
+//                        chip.setTag(topic.id);
+//                        chip.setText(topic.title);
+//
+//                        chipGroup.addView(chip);
+//                    }
+//
+//                    ((Chip) chipGroup.getChildAt(0)).setChecked(true);
+//                });
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        });
 
         chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == -1) {
@@ -151,19 +175,23 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         int headlinesCount = new Random().nextInt();
         if (headlinesCount == 0) headlinesCount = 1;
 
-        ArrayList<News> items = new ArrayList<>();
 
-        for (int i = 0; i < new Random().nextInt(20); i++) {
-            News news = new News();
-            news.body = "Some nigga body";
-            news.picture = "https://i.ytimg.com/vi/A-_Vl6fHPFo/hqdefault.jpg";
-            news.title = "Some nigga title";
+        TaskManager.execute(() -> {
+            ArrayList<News> items = new ArrayList<>(AppGlobal.database.newsDao().getAll());
+            HeadlineAdapter adapter = new HeadlineAdapter(requireContext(), items);
+            recyclerView.post(() -> recyclerView.setAdapter(adapter));
+        });
 
-            items.add(news);
-        }
 
-        HeadlineAdapter adapter = new HeadlineAdapter(requireContext(), items);
-        recyclerView.setAdapter(adapter);
+//        for (int i = 0; i < new Random().nextInt(20); i++) {
+//            News news = new News();
+//            news.body = "Some nigga body";
+//            news.picture = "https://i.ytimg.com/vi/A-_Vl6fHPFo/hqdefault.jpg";
+//            news.title = "Some nigga title";
+//
+//            items.add(news);
+//        }
+
 
         if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
     }

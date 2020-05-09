@@ -3,37 +3,26 @@ package com.feedhub.app.mvp.repository;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.feedhub.app.common.AppDatabase;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.dao.HeadlinesDao;
 import com.feedhub.app.fragment.FragmentSettings;
 import com.feedhub.app.item.Headline;
-import com.feedhub.app.item.News;
 import com.feedhub.app.mvp.contract.BaseContract;
+import com.feedhub.app.mvp.presenter.HeadlinesPresenter;
 import com.feedhub.app.net.HttpRequest;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
-public class HeadlinesRepository extends BaseContract.Repository<Headline> {
+import ru.melod1n.library.mvp.base.MvpFields;
+import ru.melod1n.library.mvp.base.MvpRepository;
+import ru.melod1n.library.mvp.base.OnLoadListener;
+
+public class HeadlinesRepository extends MvpRepository<Headline> {
 
     private HeadlinesDao headlinesDao = AppGlobal.database.headlinesDao();
-
-    private String category;
-
-    public void loadValues(String category, int offset, int count, @Nullable BaseContract.OnValuesLoadListener<Headline> listener) {
-        this.category = category;
-        loadValues(offset, count, listener);
-    }
-
-    @Override
-    public void loadValues(int offset, int count, @Nullable BaseContract.OnValuesLoadListener<Headline> listener) {
-//        loadTopics();
-    }
 
 //    private void loadTopics() {
 //        String serverUrl = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/news/topics?category=" + category;
@@ -63,14 +52,34 @@ public class HeadlinesRepository extends BaseContract.Repository<Headline> {
 //        });
 //    }
 
-    @NonNull
     @Override
-    public ArrayList<Headline> loadCachedValues(int offset, int count) {
-        return null;
+    public void loadValues(@NonNull MvpFields fields, @Nullable OnLoadListener<Headline> listener) {
+        String category = fields.getString(HeadlinesPresenter.CATEGORY);
+
+        String serverUrl =
+                AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
+                        AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, "") + "/category=" + category;
+
+        TaskManager.execute(() -> {
+            try {
+                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
+
+                int i = 0;
+            } catch (Exception e) {
+                e.printStackTrace();
+
+                sendError(listener, e);
+            }
+        });
     }
 
     @Override
-    public void cacheValues(int offset, int count, @NonNull ArrayList<Headline> values) {
+    public void loadCachedValues(@NonNull MvpFields fields, @Nullable OnLoadListener<Headline> listener) {
+
+    }
+
+    @Override
+    protected void cacheLoadedValues(@NonNull ArrayList<Headline> values) {
 
     }
 }

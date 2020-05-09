@@ -6,4 +6,19 @@
         app:key="server_url"
         app:title="@string/preference_server_url_title" />
 
+    <EditTextPreference
+        app:iconSpaceReserved="false"
+        app:key="news_key"
+        app:title="@string/preference_news_key_title" />
+
+    <EditTextPreference
+        app:iconSpaceReserved="false"
+        app:key="category_key"
+        app:title="@string/preference_category_key_title" />
+
+    <EditTextPreference
+        app:iconSpaceReserved="false"
+        app:key="topics_key"
+        app:title="@string/preference_topics_key_title" />
+
 </PreferenceScreen>

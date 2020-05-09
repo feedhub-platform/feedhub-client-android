@@ -8,62 +8,27 @@ import com.feedhub.app.dao.NewsDao;
 import com.feedhub.app.item.Headline;
 import com.feedhub.app.item.News;
 import com.feedhub.app.mvp.contract.BaseContract;
+import com.feedhub.app.mvp.repository.HeadlinesRepository;
 import com.feedhub.app.mvp.repository.NewsRepository;
+import com.feedhub.app.mvp.view.HeadlinesView;
 
 import java.util.ArrayList;
 
-public class HeadlinesPresenter implements BaseContract.Presenter<Headline> {
+import ru.melod1n.library.mvp.base.MvpFields;
+import ru.melod1n.library.mvp.base.Presenter;
 
-    @NonNull
-    private BaseContract.View<News> view;
+public class HeadlinesPresenter extends Presenter<Headline, HeadlinesView> {
 
-    @NonNull
-    private NewsRepository repository;
+    public static final String CATEGORY = "category";
 
-    private HeadlinesDao newsDao = AppGlobal.database.headlinesDao();
+    public HeadlinesPresenter(@NonNull HeadlinesView view) {
+        super(view);
 
-    public HeadlinesPresenter(@NonNull BaseContract.View<News> view) {
-        this.view = view;
-
-        repository = new NewsRepository();
+        initRepository(new HeadlinesRepository());
     }
 
     @Override
-    public void post(Runnable r) {
-        AppGlobal.handler.post(r);
-    }
-
-    @Override
-    public void prepareForLoading() {
-        view.showNoInternetView(false);
-        view.showNoItemsView(false);
-        view.showProgressBar(false);
-        view.showErrorView(null);
-    }
-
-    @Override
-    public void showList() {
-        view.showProgressBar(false);
-        view.showRefreshLayout(false);
-    }
-
-    @Override
-    public void requestValues(int offset, int count) {
-
-    }
-
-    @Override
-    public void requestCachedValues(int offset, int count) {
-
-    }
-
-    @Override
-    public void onValuesLoaded(int offset, int count, ArrayList<Headline> values, boolean isCache) {
-
-    }
-
-    @Override
-    public void onValuesError(Exception e) {
+    protected void insertValues(@NonNull MvpFields fields, @NonNull ArrayList<Headline> values) {
 
     }
 }
