@@ -2,22 +2,16 @@ package com.feedhub.app.mvp.presenter;
 
 import androidx.annotation.NonNull;
 
-import com.feedhub.app.common.AppGlobal;
-import com.feedhub.app.dao.HeadlinesDao;
-import com.feedhub.app.dao.NewsDao;
 import com.feedhub.app.item.Headline;
-import com.feedhub.app.item.News;
-import com.feedhub.app.mvp.contract.BaseContract;
 import com.feedhub.app.mvp.repository.HeadlinesRepository;
-import com.feedhub.app.mvp.repository.NewsRepository;
 import com.feedhub.app.mvp.view.HeadlinesView;
 
 import java.util.ArrayList;
 
 import ru.melod1n.library.mvp.base.MvpFields;
-import ru.melod1n.library.mvp.base.Presenter;
+import ru.melod1n.library.mvp.base.MvpPresenter;
 
-public class HeadlinesPresenter extends Presenter<Headline, HeadlinesView> {
+public class HeadlinesPresenter extends MvpPresenter<Headline, HeadlinesView> {
 
     public static final String CATEGORY = "category";
 

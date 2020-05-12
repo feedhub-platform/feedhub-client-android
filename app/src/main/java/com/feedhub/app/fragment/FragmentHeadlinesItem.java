@@ -28,7 +28,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,6 +48,10 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     ChipGroup chipGroup;
 
     private int lastCheckedId;
+
+    private String selectedTopic = "";
+
+    private HeadlineAdapter adapter;
 
     public static FragmentHeadlinesItem newInstance(String id, String title, ArrayList<Topic> topics) {
         FragmentHeadlinesItem fragment = new FragmentHeadlinesItem();
@@ -76,7 +79,7 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
     @Override
     public void onRefresh() {
-        insertTestData();
+        refreshData();
     }
 
     @Nullable
@@ -93,8 +96,6 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         prepareRefreshLayout();
         prepareRecyclerView();
         prepareChipGroup();
-
-        insertTestData();
     }
 
     @SuppressLint("SetTextI18n")
@@ -114,43 +115,14 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
         Chip chip = (Chip) chipGroup.getChildAt(0);
 
-        if (chip != null) chip.setChecked(true);
+        if (chip != null) {
+            chip.setChecked(true);
 
-//        ArrayList<Topic> items = new ArrayList<>();
-//
-//        TaskManager.execute(() -> {
-//            try {
-//                String serverUrl =
-//                        AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
-//                                AppGlobal.preferences.getString(FragmentSettings.KEY_TOPICS_KEY, "") +
-//                                "?category=" + categoryId;
-//
-//                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
-//                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-//                JSONArray topics = Objects.requireNonNull(response.optJSONArray("topics").optJSONObject(0).optJSONArray("items"));
-//
-//                for (int i = 0; i < topics.length(); i++) {
-//                    items.add(new Topic(topics.optJSONObject(i)));
-//                }
-//
-//                AppGlobal.handler.post(() -> {
-//                    for (int i = 0; i < items.size(); i++) {
-//                        Topic topic = items.get(i);
-//
-//                        Chip chip = (Chip) getLayoutInflater().inflate(R.layout.fragment_headlines_item_chip, chipGroup, false);
-//                        chip.setId(i);
-//                        chip.setTag(topic.id);
-//                        chip.setText(topic.title);
-//
-//                        chipGroup.addView(chip);
-//                    }
-//
-//                    ((Chip) chipGroup.getChildAt(0)).setChecked(true);
-//                });
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        });
+            selectedTopic = topics.get(0).id;
+
+            loadData();
+        }
+
 
         chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == -1) {
@@ -158,6 +130,36 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
                 ((Chip) chipGroup.findViewById(checkedId)).setChecked(true);
             } else {
                 lastCheckedId = checkedId;
+            }
+
+            selectedTopic = topics.get(checkedId).id;
+            loadData();
+        });
+    }
+
+    private void loadData() {
+        TaskManager.execute(() -> {
+            try {
+                String serverUrl = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
+                        AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, "") + "?category=" + categoryId + "&topic=" + selectedTopic;
+
+                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
+                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+                JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
+
+                ArrayList<News> news = new ArrayList<>();
+
+                for (int i = 0; i < items.length(); i++) {
+                    news.add(new News(items.optJSONObject(i)));
+                }
+
+                AppGlobal.handler.post(() -> {
+                    createAdapter(news);
+
+                    if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         });
     }
@@ -171,11 +173,18 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
     }
 
+    private void createAdapter(ArrayList<News> news) {
+        if (adapter == null) {
+            adapter = new HeadlineAdapter(requireContext(), news);
+            recyclerView.setAdapter(adapter);
+            return;
+        }
+
+        adapter.changeItems(news);
+        adapter.notifyDataSetChanged();
+    }
+
     private void insertTestData() {
-        int headlinesCount = new Random().nextInt();
-        if (headlinesCount == 0) headlinesCount = 1;
-
-
         TaskManager.execute(() -> {
             ArrayList<News> items = new ArrayList<>(AppGlobal.database.newsDao().getAll());
             HeadlineAdapter adapter = new HeadlineAdapter(requireContext(), items);
@@ -183,16 +192,13 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         });
 
 
-//        for (int i = 0; i < new Random().nextInt(20); i++) {
-//            News news = new News();
-//            news.body = "Some nigga body";
-//            news.picture = "https://i.ytimg.com/vi/A-_Vl6fHPFo/hqdefault.jpg";
-//            news.title = "Some nigga title";
-//
-//            items.add(news);
-//        }
-
-
         if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
+    }
+
+    private void refreshData() {
+        FragmentHeadlines fragment = (FragmentHeadlines) requireParentFragment();
+        fragment.loadCategories();
+
+        loadData();
     }
 }

@@ -2,25 +2,22 @@ package com.feedhub.app.fragment;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.ArrayMap;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.feedhub.app.R;
-import com.feedhub.app.activity.SettingsActivity;
 import com.feedhub.app.adapter.HeadlinesPagerAdapter;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.current.BaseFragment;
+import com.feedhub.app.dialog.ProfileBottomSheetDialog;
 import com.feedhub.app.item.Headline;
 import com.feedhub.app.item.Topic;
 import com.feedhub.app.mvp.view.HeadlinesView;
@@ -32,8 +29,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -53,6 +48,8 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     TabLayout tabLayout;
 
 
+    private boolean isPrepared;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -71,7 +68,7 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
         }
     }
 
-    private void loadCategories() {
+    void loadCategories() {
         String url =
                 AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
                         AppGlobal.preferences.getString(FragmentSettings.KEY_CATEGORY_KEY, "");
@@ -117,11 +114,20 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
                     FragmentHeadlines.this.topics.put(categoryId, arrayList);
                 }
 
-                if (isAttached())
-                    AppGlobal.handler.post(() -> {
-                        prepareViewPager();
-                        prepareTabLayout();
-                    });
+                if (isAttached()) {
+                    if (!isPrepared) {
+                        isPrepared = true;
+
+                        AppGlobal.handler.post(() -> {
+                            prepareViewPager();
+                            prepareTabLayout();
+                        });
+                    } else {
+                        if (viewPager.getAdapter() != null) {
+                            viewPager.post(() -> viewPager.getAdapter().notifyDataSetChanged());
+                        }
+                    }
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -139,27 +145,7 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     }
 
     private View.OnClickListener getAvatarClickListener() {
-        return v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-
-            String[] items = new String[]{
-                    getString(R.string.navigation_settings)
-            };
-
-            builder.setItems(items, (dialog, which) -> {
-                switch (which) {
-                    case 0:
-                        openSettingsScreen();
-                        break;
-                }
-            });
-
-            builder.create().show();
-        };
-    }
-
-    private void openSettingsScreen() {
-        startActivity(new Intent(requireContext(), SettingsActivity.class));
+        return v -> ProfileBottomSheetDialog.show(getParentFragmentManager());
     }
 
     @SuppressLint("ClickableViewAccessibility")

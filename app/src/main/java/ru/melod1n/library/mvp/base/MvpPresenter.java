@@ -4,8 +4,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
-public abstract class Presenter<T, V extends View> {
+public abstract class MvpPresenter<T, V extends MvpView> {
 
     protected String TAG;
 
@@ -24,7 +25,7 @@ public abstract class Presenter<T, V extends View> {
     protected ArrayList<T> values = new ArrayList<>();
 
 
-    public Presenter(@NonNull V view) {
+    public MvpPresenter(@NonNull V view) {
         this.view = view;
     }
 
@@ -64,7 +65,7 @@ public abstract class Presenter<T, V extends View> {
     }
 
     public void requestLoadValues(@NonNull MvpFields fields) {
-        repository.loadValues(fields, new OnLoadListener<T>() {
+        Objects.requireNonNull(repository, "Repository must be inited in Presenter's constructor").loadValues(fields, new MvpOnLoadListener<T>() {
             @Override
             public void onSuccessLoad(ArrayList<T> values) {
                 onValuesLoaded(fields, values);
@@ -78,7 +79,7 @@ public abstract class Presenter<T, V extends View> {
     }
 
     public void requestCachedData(@NonNull MvpFields fields) {
-        repository.loadCachedValues(fields, new OnLoadListener<T>() {
+        Objects.requireNonNull(repository, "Repository must be inited in Presenter's constructor").loadCachedValues(fields, new MvpOnLoadListener<T>() {
             @Override
             public void onSuccessLoad(ArrayList<T> values) {
                 onValuesLoaded(fields, values);

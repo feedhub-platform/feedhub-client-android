@@ -13,6 +13,8 @@ import androidx.room.Room;
 
 import com.feedhub.app.R;
 
+import ru.melod1n.library.mvp.base.MvpBase;
+
 public class AppGlobal extends Application {
 
     public static AppGlobal getInstance() {
@@ -48,5 +50,7 @@ public class AppGlobal extends Application {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
 
         colorAccent = resources.getColor(R.color.accent, null);
+
+        MvpBase.init(handler);
     }
 }

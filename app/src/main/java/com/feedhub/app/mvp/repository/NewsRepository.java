@@ -22,7 +22,7 @@ import java.util.Objects;
 import ru.melod1n.library.mvp.base.MvpConstants;
 import ru.melod1n.library.mvp.base.MvpException;
 import ru.melod1n.library.mvp.base.MvpFields;
-import ru.melod1n.library.mvp.base.OnLoadListener;
+import ru.melod1n.library.mvp.base.MvpOnLoadListener;
 import ru.melod1n.library.mvp.base.MvpRepository;
 
 public class NewsRepository extends MvpRepository<News> {
@@ -30,7 +30,7 @@ public class NewsRepository extends MvpRepository<News> {
     private NewsDao newsDao = AppGlobal.database.newsDao();
 
     @Override
-    public void loadValues(@NonNull MvpFields fields, @Nullable OnLoadListener<News> listener) {
+    public void loadValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<News> listener) {
         String serverUrl =
                 AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
                         AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, "");
@@ -60,7 +60,7 @@ public class NewsRepository extends MvpRepository<News> {
     }
 
     @Override
-    public void loadCachedValues(@NonNull MvpFields fields, @Nullable OnLoadListener<News> listener) {
+    public void loadCachedValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<News> listener) {
         int offset = fields.getInt(MvpConstants.OFFSET);
         int count = fields.getInt(MvpConstants.COUNT);
 

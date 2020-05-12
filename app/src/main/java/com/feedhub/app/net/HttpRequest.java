@@ -1,8 +1,11 @@
 package com.feedhub.app.net;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.collection.ArrayMap;
 
+import com.feedhub.app.BuildConfig;
 import com.feedhub.app.io.EasyStreams;
 
 import java.io.IOException;
@@ -24,6 +27,10 @@ public class HttpRequest {
         this.url = url;
         this.method = method;
         this.params = params;
+
+        if (BuildConfig.DEBUG) {
+            Log.d("URL", url);
+        }
     }
 
     public static HttpRequest get(String url, ArrayMap<String, String> params) {
@@ -39,6 +46,10 @@ public class HttpRequest {
         String content = EasyStreams.read(input);
 
         connection.disconnect();
+
+        if (BuildConfig.DEBUG) {
+            Log.d("Response", content);
+        }
         return content;
     }
 
