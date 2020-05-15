@@ -184,17 +184,6 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         adapter.notifyDataSetChanged();
     }
 
-    private void insertTestData() {
-        TaskManager.execute(() -> {
-            ArrayList<News> items = new ArrayList<>(AppGlobal.database.newsDao().getAll());
-            HeadlineAdapter adapter = new HeadlineAdapter(requireContext(), items);
-            recyclerView.post(() -> recyclerView.setAdapter(adapter));
-        });
-
-
-        if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
-    }
-
     private void refreshData() {
         FragmentHeadlines fragment = (FragmentHeadlines) requireParentFragment();
         fragment.loadCategories();

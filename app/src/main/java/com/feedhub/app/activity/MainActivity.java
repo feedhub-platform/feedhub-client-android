@@ -2,6 +2,7 @@ package com.feedhub.app.activity;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -14,7 +15,10 @@ import com.feedhub.app.fragment.FragmentHeadlines;
 import com.feedhub.app.fragment.FragmentSaved;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.Arrays;
+
 import butterknife.BindView;
+import ru.melod1n.library.fragment.FragmentSwitcher;
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
@@ -37,7 +41,35 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
         prepareBottomNavView();
 
+        prepareFragments();
+
         replaceFragment(fragmentGeneral);
+    }
+
+    private void prepareFragments() {
+        View container = findViewById(R.id.fragmentContainer);
+        container.setVisibility(View.INVISIBLE);
+
+        int containerId = container.getId();
+
+        FragmentSwitcher.addFragments(
+                getSupportFragmentManager(),
+                containerId,
+                Arrays.asList(fragmentGeneral, fragmentHeadlines, fragmentFollowing, fragmentSaved)
+        );
+
+        FragmentSwitcher.showFragment(getSupportFragmentManager(), fragmentGeneral.getClass().getSimpleName(), true);
+
+//        getSupportFragmentManager()
+//                .beginTransaction()
+//                .add(containerId, fragmentGeneral, fragmentGeneral.getClass().getSimpleName())
+//                .add(containerId, fragmentHeadlines, fragmentHeadlines.getClass().getSimpleName())
+//                .add(containerId, fragmentFollowing, fragmentFollowing.getClass().getSimpleName())
+//                .add(containerId, fragmentSaved, fragmentSaved.getClass().getSimpleName())
+//                .commit();
+
+
+        container.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -69,6 +101,6 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     }
 
     private void replaceFragment(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, fragment, fragment.getClass().getSimpleName()).commit();
+        FragmentSwitcher.showFragment(getSupportFragmentManager(), fragment.getTag(), true);
     }
 }
