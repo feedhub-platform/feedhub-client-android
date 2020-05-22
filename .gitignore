@@ -84,3 +84,6 @@ app/debug/output.json
 
 .archive/
 app/src/main/java/com/feedhub/app/util/Constants.java
+*.apk
+app/release/app-release.apk
+app/release/output.json

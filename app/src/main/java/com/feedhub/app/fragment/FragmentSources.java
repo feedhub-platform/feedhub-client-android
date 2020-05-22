@@ -1,5 +1,6 @@
 package com.feedhub.app.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.feedhub.app.R;
-import com.feedhub.app.activity.MainActivity;
+import com.feedhub.app.activity.SourcesActivity;
 import com.feedhub.app.adapter.SourceAdapter;
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.dialog.ProfileBottomSheetDialog;
@@ -98,12 +99,17 @@ public class FragmentSources extends BaseFragment implements SourcesView, Source
     public void onItemClick(int position) {
         Source source = adapter.getItem(position);
 
-        Bundle arguments = new Bundle();
-        arguments.putString("sourceId", source.id);
+        startActivity(
+                new Intent(requireContext(), SourcesActivity.class)
+                        .putExtra("sourceId", source.id)
+        );
 
-        MainActivity activity = (MainActivity) requireActivity();
-        activity.getNavigationView().setSelectedItemId(R.id.navigationHeadlines);
-        activity.replaceFragment(activity.fragmentHeadlines, arguments);
+//        Bundle arguments = new Bundle();
+//        arguments.putString("sourceId", source.id);
+//
+//        MainActivity activity = (MainActivity) requireActivity();
+//        activity.getNavigationView().setSelectedItemId(R.id.navigationHeadlines);
+//        activity.replaceFragment(activity.fragmentHeadlines, arguments);
     }
 
     @Override

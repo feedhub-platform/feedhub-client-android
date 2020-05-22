@@ -49,25 +49,22 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
 
     private HeadlinesPagerAdapter adapter;
 
+    private String sourceId;
+
+    public static FragmentHeadlines newInstance(@NonNull Bundle arguments) {
+        FragmentHeadlines fragmentHeadlines = new FragmentHeadlines();
+        fragmentHeadlines.setArguments(arguments);
+        return fragmentHeadlines;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-    }
 
-    @Override
-    public void setArguments(@Nullable Bundle args) {
-        super.setArguments(args);
-
-        if (args == null) return;
-
-        String sourceId = args.getString("sourceId", "_empty");
-
-        if (sourceId.equals("_empty")) return;
-
-        needToDestroy = true;
-
-        loadCategories(null, sourceId);
+        if (getArguments() != null) {
+            sourceId = getArguments().getString("sourceId", "_empty");
+        }
     }
 
     @Nullable
@@ -86,21 +83,21 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
 
         presenter = new HeadlinesPresenter(this);
 
-        loadCategories(savedInstanceState, null);
+        loadCategories(savedInstanceState);
     }
 
     void loadCategories() {
-        loadCategories(null, null);
+        loadCategories(null);
     }
 
-    private void loadCategories(Bundle savedInstanceState, @Nullable String sourceId) {
-        if (savedInstanceState == null && isAttached() || sourceId != null) {
+    private void loadCategories(Bundle savedInstanceState) {
+        if (savedInstanceState == null && isAttached()) {
             MvpFields fields = new MvpFields()
                     .put(MvpConstants.OFFSET, 0)
                     .put(MvpConstants.COUNT, 30)
                     .put(MvpConstants.FROM_CACHE, false);
 
-            if (sourceId != null) {
+            if (sourceId != null && !"_empty".equals(sourceId)) {
                 fields.put("sourceId", sourceId);
             }
 
@@ -118,17 +115,22 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
         super.onHiddenChanged(hidden);
 
         if (needToDestroy && hidden) {
-            loadCategories(null, null);
+            loadCategories(null);
         }
     }
 
     private void prepareToolbar() {
         initToolbar(R.id.toolbar);
 
-        toolbar.setTitle(R.string.app_name);
+        boolean useForSource = sourceId != null && !"_empty".equals(sourceId);
+
+        toolbar.setTitle(useForSource ? R.string.navigation_sources : R.string.app_name);
         toolbar.setNavigationClickListener(v -> {
+            if (useForSource) {
+                requireActivity().onBackPressed();
+            }
         });
-        toolbar.setNavigationIcon(R.drawable.ic_search);
+        toolbar.setNavigationIcon(useForSource ? R.drawable.ic_arrow_back : R.drawable.ic_search);
         toolbar.setAvatarClickListener(getAvatarClickListener());
     }
 
