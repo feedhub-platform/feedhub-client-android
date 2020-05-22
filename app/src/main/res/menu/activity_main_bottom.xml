@@ -10,6 +10,10 @@
         android:id="@+id/navigationHeadlines"
         android:icon="@drawable/ic_headline"
         android:title="@string/navigation_headlines" />
+    <item
+        android:id="@+id/navigationSources"
+        android:icon="@drawable/ic_source"
+        android:title="@string/navigation_sources" />
 
     <item
         android:id="@+id/navigationFollowing"

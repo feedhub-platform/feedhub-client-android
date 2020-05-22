@@ -4,17 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/newsRoot"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/newsCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_margin="12dp"
         app:cardBackgroundColor="?android:windowBackground"
         app:cardCornerRadius="12dp"
         app:cardElevation="4dp"
-        app:cardUseCompatPadding="true"
         app:rippleColor="?colorControlHighlight">
 
         <LinearLayout
@@ -22,12 +21,13 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <com.makeramen.roundedimageview.RoundedImageView
+            <com.facebook.drawee.view.SimpleDraweeView
                 android:id="@+id/newsWidePicture"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
-                android:scaleType="centerCrop"
-                android:src="?colorAccent" />
+                app:actualImageScaleType="centerCrop"
+                app:fadeDuration="200"
+                tools:src="?colorAccent" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -81,16 +81,16 @@
                 android:focusable="false">
 
                 <com.google.android.material.chip.Chip
-                    style="@style/AppTheme.Chip.Accent"
                     android:id="@+id/newsLanguage"
+                    style="@style/AppTheme.Chip.Accent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:chipIcon="@drawable/ic_language"
                     tools:text="RU" />
 
                 <com.google.android.material.chip.Chip
-                    style="@style/AppTheme.Chip"
                     android:id="@+id/newsOriginTitle"
+                    style="@style/AppTheme.Chip"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     app:chipIcon="@drawable/ic_link"

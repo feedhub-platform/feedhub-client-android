@@ -1,7 +1,7 @@
 package com.feedhub.app.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,17 +9,15 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.feedhub.app.R;
-import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.current.BaseAdapter;
 import com.feedhub.app.current.BaseHolder;
 import com.feedhub.app.item.News;
-import com.feedhub.app.util.AndroidUtils;
 import com.feedhub.app.util.StringUtils;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
 import com.makeramen.roundedimageview.RoundedImageView;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -59,7 +57,7 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         RoundedImageView picture;
 
         @BindView(R.id.newsWidePicture)
-        RoundedImageView widePicture;
+        SimpleDraweeView widePicture;
 
         @BindView(R.id.newsLanguage)
         Chip language;
@@ -95,36 +93,37 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
 
             if (TextUtils.isEmpty(sPicture)) {
                 widePicture.setVisibility(View.GONE);
-                widePicture.setImageDrawable(null);
+//                widePicture.setImageDrawable(null);
 
                 picture.setVisibility(View.GONE);
-                picture.setImageDrawable(null);
+//                picture.setImageDrawable(null);
             } else {
-                new Thread(() -> {
-                    try {
-                        Bitmap bitmap = Picasso.get().load(sPicture).get();
-
-//                        float h = bitmap.getHeight();
-//                        float w = bitmap.getWidth();
-
-                        AppGlobal.handler.post(() -> {
-                            widePicture.setImageBitmap(bitmap);
-//                            if (w / h > 1.5) {
-//                                picture.setVisibility(View.GONE);
-//                                widePicture.setVisibility(View.VISIBLE);
+                widePicture.setImageURI(Uri.parse(sPicture));
+//                new Thread(() -> {
+//                    try {
+//                        Bitmap bitmap = Picasso.get().load(sPicture).get();
 //
-//                                widePicture.setImageBitmap(bitmap);
-//                            } else {
-//                                picture.setVisibility(View.VISIBLE);
-//                                widePicture.setVisibility(View.GONE);
+////                        float h = bitmap.getHeight();
+////                        float w = bitmap.getWidth();
 //
-//                                picture.setImageBitmap(bitmap);
-//                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }).start();
+//                        AppGlobal.handler.post(() -> {
+//                            widePicture.setImageBitmap(bitmap);
+////                            if (w / h > 1.5) {
+////                                picture.setVisibility(View.GONE);
+////                                widePicture.setVisibility(View.VISIBLE);
+////
+////                                widePicture.setImageBitmap(bitmap);
+////                            } else {
+////                                picture.setVisibility(View.VISIBLE);
+////                                widePicture.setVisibility(View.GONE);
+////
+////                                picture.setImageBitmap(bitmap);
+////                            }
+//                        });
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }).start();
             }
         }
     }

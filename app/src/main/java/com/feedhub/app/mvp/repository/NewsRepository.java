@@ -5,11 +5,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.feedhub.app.common.AppGlobal;
-import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.dao.NewsDao;
 import com.feedhub.app.fragment.FragmentSettings;
 import com.feedhub.app.item.News;
-import com.feedhub.app.net.HttpRequest;
+import com.feedhub.app.net.RequestBuilder;
 import com.feedhub.app.util.ArrayUtils;
 
 import org.json.JSONArray;
@@ -31,32 +30,61 @@ public class NewsRepository extends MvpRepository<News> {
 
     @Override
     public void loadValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<News> listener) {
-        String serverUrl =
-                AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
-                        AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, "");
+        RequestBuilder.create()
+//                .baseUrl(prefs.getString(FragmentSettings.KEY_SERVER_URL, ""))
+                .method(prefs.getString(FragmentSettings.KEY_NEWS_KEY, ""))
+                .execute(new RequestBuilder.OnResponseListener<JSONObject>() {
+                    @Override
+                    public void onSuccess(JSONObject root) {
+                        try {
+                            JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+                            JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
 
-        if (serverUrl.trim().isEmpty()) return;
+                            final ArrayList<News> news = new ArrayList<>();
 
-        TaskManager.execute(() -> {
-            try {
-                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
-                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-                JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
+                            for (int i = 0; i < items.length(); i++) {
+                                news.add(new News(items.optJSONObject(i)));
+                            }
 
-                final ArrayList<News> news = new ArrayList<>();
+                            cacheLoadedValues(news);
+                            sendValuesToPresenter(fields, news, listener);
+                        } catch (Exception e) {
+                            e.printStackTrace();
 
-                for (int i = 0; i < items.length(); i++) {
-                    news.add(new News(items.optJSONObject(i)));
-                }
+                            sendError(listener, e);
+                        }
+                    }
 
-                cacheLoadedValues(news);
-                sendValuesToPresenter(fields, news, listener);
-            } catch (Exception e) {
-                e.printStackTrace();
+                    @Override
+                    public void onError(Exception e) {
+                        sendError(listener, e);
+                    }
+                });
 
-                sendError(listener, e);
-            }
-        });
+//        String serverUrl =
+//                AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
+//                        AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, "");
+//
+//        TaskManager.execute(() -> {
+//            try {
+//                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
+//                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+//                JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
+//
+//                final ArrayList<News> news = new ArrayList<>();
+//
+//                for (int i = 0; i < items.length(); i++) {
+//                    news.add(new News(items.optJSONObject(i)));
+//                }
+//
+//                cacheLoadedValues(news);
+//                sendValuesToPresenter(fields, news, listener);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//
+//                sendError(listener, e);
+//            }
+//        });
     }
 
     @Override

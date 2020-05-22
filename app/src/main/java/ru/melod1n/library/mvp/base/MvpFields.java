@@ -3,6 +3,7 @@ package ru.melod1n.library.mvp.base;
 import android.util.ArrayMap;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -33,22 +34,27 @@ public class MvpFields {
         return (Boolean) fields.get(key);
     }
 
-    public Object get(String key) {
-        return fields.get(key);
+    @Nullable
+    public <T> T get(String key) {
+        return (T) fields.get(key);
     }
 
     @NonNull
-    public Object getNonNull(String key) {
-        return Objects.requireNonNull(fields.get(key));
+    public <T> T getNonNull(String key) {
+        return (T) Objects.requireNonNull(fields.get(key));
     }
 
     @NonNull
-    public Object getNonNull(Object object) {
+    public <T> T getNonNull(T object) {
         return Objects.requireNonNull(object);
     }
 
     public Map<String, Object> getFields() {
         return fields;
+    }
+
+    public int length() {
+        return fields.size();
     }
 
 }

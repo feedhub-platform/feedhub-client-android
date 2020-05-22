@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 import androidx.room.Room;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.feedhub.app.R;
 
 import ru.melod1n.library.mvp.base.MvpBase;
@@ -33,6 +34,8 @@ public class AppGlobal extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Fresco.initialize(this);
 
         resources = getResources();
 

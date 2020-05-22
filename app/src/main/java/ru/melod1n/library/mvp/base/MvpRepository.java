@@ -1,15 +1,21 @@
 package ru.melod1n.library.mvp.base;
 
+import android.content.SharedPreferences;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.feedhub.app.common.AppGlobal;
 
 import java.util.ArrayList;
 
 public abstract class MvpRepository<T> {
 
-    public abstract void loadValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<T> listener);
+    protected SharedPreferences prefs = AppGlobal.preferences;
 
-    public abstract void loadCachedValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<T> listener);
+    public void loadValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<T> listener) {}
+
+    public void loadCachedValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<T> listener) {}
 
     protected void sendError(@Nullable MvpOnLoadListener<T> listener, @NonNull String errorId) {
         if (listener != null) {
@@ -29,7 +35,7 @@ public abstract class MvpRepository<T> {
         }
     }
 
-    protected abstract void cacheLoadedValues(@NonNull ArrayList<T> values);
+    protected void cacheLoadedValues(@NonNull ArrayList<T> values) {}
 
     protected void startNewThread(Runnable runnable) {
         new Thread(runnable).start();

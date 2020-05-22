@@ -15,11 +15,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.feedhub.app.R;
 import com.feedhub.app.adapter.HeadlineAdapter;
 import com.feedhub.app.common.AppGlobal;
-import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.item.News;
 import com.feedhub.app.item.Topic;
-import com.feedhub.app.net.HttpRequest;
+import com.feedhub.app.net.RequestBuilder;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 
@@ -34,10 +33,6 @@ import butterknife.ButterKnife;
 
 public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener {
 
-    private String categoryTitle;
-    private String categoryId;
-    private ArrayList<Topic> topics;
-
     @BindView(R.id.refreshLayout)
     SwipeRefreshLayout refreshLayout;
 
@@ -47,6 +42,9 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     @BindView(R.id.headlinesItemChip)
     ChipGroup chipGroup;
 
+    private String categoryTitle;
+    private String categoryId;
+    private ArrayList<Topic> topics;
     private int lastCheckedId;
 
     private String selectedTopic = "";
@@ -69,6 +67,7 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
 
         if (getArguments() != null) {
             categoryTitle = getArguments().getString("title", "");
@@ -96,6 +95,8 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         prepareRefreshLayout();
         prepareRecyclerView();
         prepareChipGroup();
+
+        loadData();
     }
 
     @SuppressLint("SetTextI18n")
@@ -113,15 +114,15 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
             chipGroup.addView(chip);
         }
 
-        Chip chip = (Chip) chipGroup.getChildAt(0);
-
-        if (chip != null) {
-            chip.setChecked(true);
-
-            selectedTopic = topics.get(0).id;
-
-            loadData();
-        }
+//        Chip chip = (Chip) chipGroup.getChildAt(0);
+//
+//        if (chip != null) {
+//            chip.setChecked(true);
+//
+//            selectedTopic = topics.get(0).id;
+//
+//            loadData();
+//        }
 
 
         chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
@@ -138,30 +139,57 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     }
 
     private void loadData() {
-        TaskManager.execute(() -> {
-            try {
-                String serverUrl = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
-                        AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, "") + "?category=" + categoryId + "&topic=" + selectedTopic;
+        RequestBuilder builder = RequestBuilder.create()
+                .method(AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, ""))
+                .put("category", categoryId);
 
-                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
-                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-                JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
+        if (!selectedTopic.isEmpty())
+            builder.put("topic", selectedTopic);
 
+        builder.execute(new RequestBuilder.OnResponseListener<JSONObject>() {
+            @Override
+            public void onSuccess(JSONObject response) {
+                JSONObject jResponse = Objects.requireNonNull(response.optJSONObject("response"));
+                JSONArray items = Objects.requireNonNull(jResponse.optJSONArray("items"));
                 ArrayList<News> news = new ArrayList<>();
 
                 for (int i = 0; i < items.length(); i++) {
                     news.add(new News(items.optJSONObject(i)));
                 }
-
                 AppGlobal.handler.post(() -> {
                     createAdapter(news);
-
                     if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
                 });
-            } catch (Exception e) {
-                e.printStackTrace();
+            }
+
+            @Override
+            public void onError(Exception e) {
             }
         });
+//        TaskManager.execute(() -> {
+//            try {
+//                String serverUrl = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
+//                        AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, "") + "?category=" + categoryId + "&topic=" + selectedTopic;
+//
+//                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
+//                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+//                JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
+//
+//                ArrayList<News> news = new ArrayList<>();
+//
+//                for (int i = 0; i < items.length(); i++) {
+//                    news.add(new News(items.optJSONObject(i)));
+//                }
+//
+//                AppGlobal.handler.post(() -> {
+//                    createAdapter(news);
+//
+//                    if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
+//                });
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        });
     }
 
     private void prepareRefreshLayout() {

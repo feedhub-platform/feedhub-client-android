@@ -6,14 +6,15 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public abstract class MvpPresenter<T, V extends MvpView> {
+public abstract class MvpPresenter<T, V extends MvpView<T>, R extends MvpRepository<T>> {
 
     protected String TAG;
 
-    protected MvpRepository<T> repository;
-
     @Nullable
     protected V view;
+
+    @NonNull
+    protected R repository;
 
     @NonNull
     protected ArrayList<T> loadedValues = new ArrayList<>();
@@ -29,7 +30,7 @@ public abstract class MvpPresenter<T, V extends MvpView> {
         this.view = view;
     }
 
-    protected void initRepository(MvpRepository<T> repository) {
+    protected void initRepository(@NonNull R repository) {
         this.repository = repository;
     }
 
@@ -65,7 +66,9 @@ public abstract class MvpPresenter<T, V extends MvpView> {
     }
 
     public void requestLoadValues(@NonNull MvpFields fields) {
-        Objects.requireNonNull(repository, "Repository must be inited in Presenter's constructor").loadValues(fields, new MvpOnLoadListener<T>() {
+        fields.put(MvpConstants.FROM_CACHE, false);
+
+        Objects.requireNonNull(repository, "Repository must be init in Presenter's constructor").loadValues(fields, new MvpOnLoadListener<T>() {
             @Override
             public void onSuccessLoad(ArrayList<T> values) {
                 onValuesLoaded(fields, values);
@@ -79,7 +82,9 @@ public abstract class MvpPresenter<T, V extends MvpView> {
     }
 
     public void requestCachedData(@NonNull MvpFields fields) {
-        Objects.requireNonNull(repository, "Repository must be inited in Presenter's constructor").loadCachedValues(fields, new MvpOnLoadListener<T>() {
+        fields.put(MvpConstants.FROM_CACHE, true);
+
+        Objects.requireNonNull(repository, "Repository must be init in Presenter's constructor").loadCachedValues(fields, new MvpOnLoadListener<T>() {
             @Override
             public void onSuccessLoad(ArrayList<T> values) {
                 onValuesLoaded(fields, values);
@@ -116,7 +121,11 @@ public abstract class MvpPresenter<T, V extends MvpView> {
         if (view != null) view.showErrorView(e);
     }
 
-    protected abstract void insertValues(@NonNull MvpFields fields, @NonNull ArrayList<T> values);
+    protected void insertValues(@NonNull MvpFields fields, @NonNull ArrayList<T> values) {
+        if (view != null) {
+            view.insertValues(fields, values);
+        }
+    }
 
     public void destroy() {
         view = null;

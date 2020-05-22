@@ -13,6 +13,7 @@ import com.feedhub.app.fragment.FragmentFollowing;
 import com.feedhub.app.fragment.FragmentGeneral;
 import com.feedhub.app.fragment.FragmentHeadlines;
 import com.feedhub.app.fragment.FragmentSaved;
+import com.feedhub.app.fragment.FragmentSources;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Arrays;
@@ -22,10 +23,11 @@ import ru.melod1n.library.fragment.FragmentSwitcher;
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
+    public final FragmentHeadlines fragmentHeadlines = new FragmentHeadlines();
     private final FragmentGeneral fragmentGeneral = new FragmentGeneral();
-    private final FragmentHeadlines fragmentHeadlines = new FragmentHeadlines();
     private final FragmentFollowing fragmentFollowing = new FragmentFollowing();
     private final FragmentSaved fragmentSaved = new FragmentSaved();
+    private final FragmentSources fragmentSources = new FragmentSources();
 
     @BindView(R.id.bottomNavigationView)
     BottomNavigationView navigationView;
@@ -48,17 +50,20 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
     private void prepareFragments() {
         View container = findViewById(R.id.fragmentContainer);
-        container.setVisibility(View.INVISIBLE);
+        container.setVisibility(View.VISIBLE);
+        container.setAlpha(0);
+        container.setClickable(false);
+        container.setFocusable(false);
 
         int containerId = container.getId();
 
         FragmentSwitcher.addFragments(
                 getSupportFragmentManager(),
                 containerId,
-                Arrays.asList(fragmentGeneral, fragmentHeadlines, fragmentFollowing, fragmentSaved)
+                Arrays.asList(fragmentGeneral, fragmentHeadlines, fragmentFollowing, fragmentSaved, fragmentSources)
         );
 
-        FragmentSwitcher.showFragment(getSupportFragmentManager(), fragmentGeneral.getClass().getSimpleName(), true);
+        FragmentSwitcher.showFragment(getSupportFragmentManager(), fragmentGeneral.getClass().getSimpleName(), null, true);
 
 //        getSupportFragmentManager()
 //                .beginTransaction()
@@ -69,7 +74,11 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 //                .commit();
 
 
-        container.setVisibility(View.VISIBLE);
+        container.animate().alpha(1).setDuration(1250).withEndAction(() -> {
+            container.setClickable(true);
+            container.setFocusable(true);
+        }).start();
+//        container.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -87,6 +96,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             case R.id.navigationSaved:
                 replaceFragment(fragmentSaved);
                 return true;
+            case R.id.navigationSources:
+                replaceFragment(fragmentSources);
+                return true;
         }
         return false;
     }
@@ -101,6 +113,14 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     }
 
     private void replaceFragment(Fragment fragment) {
-        FragmentSwitcher.showFragment(getSupportFragmentManager(), fragment.getTag(), true);
+        replaceFragment(fragment, null);
+    }
+
+    public void replaceFragment(@NonNull Fragment fragment, Bundle arguments) {
+        FragmentSwitcher.showFragment(getSupportFragmentManager(), fragment.getTag(), arguments, true);
+    }
+
+    public BottomNavigationView getNavigationView() {
+        return navigationView;
     }
 }
