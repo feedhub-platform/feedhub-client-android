@@ -38,8 +38,8 @@ public abstract class BaseAdapter<T, VH extends BaseHolder>
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        holder.bind(position);
         initListeners(holder, position);
+        holder.bind(position);
     }
 
     private void initListeners(@NonNull VH holder, int position) {

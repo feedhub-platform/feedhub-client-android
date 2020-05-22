@@ -10,4 +10,8 @@
     <string name="preference_server_url_title">Server url</string>
 
     <string name="cause_exception">Cause exception: %s</string>
+    <string name="preference_news_key_title">News key</string>
+    <string name="preference_category_key_title">Category key</string>
+    <string name="preference_topics_key_title">Topics key</string>
+    <string name="navigation_sources">Sources</string>
 </resources>

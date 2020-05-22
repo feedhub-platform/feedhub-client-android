@@ -2,6 +2,7 @@ package com.feedhub.app.item;
 
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import org.json.JSONObject;
@@ -23,12 +24,14 @@ public class News {
     public News() {
     }
 
+    @Ignore
     public News(String title, String body, String picture) {
         this.title = title;
         this.body = body;
         this.picture = picture;
     }
 
+    @Ignore
     public News(JSONObject o) {
         id = o.optString("id");
         title = o.optString("title");

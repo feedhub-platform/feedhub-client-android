@@ -1,22 +1,22 @@
 package com.feedhub.app.fragment;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.feedhub.app.R;
-import com.feedhub.app.activity.SettingsActivity;
 import com.feedhub.app.adapter.HeadlinesPagerAdapter;
 import com.feedhub.app.current.BaseFragment;
+import com.feedhub.app.dialog.ProfileBottomSheetDialog;
+import com.feedhub.app.item.Headline;
+import com.feedhub.app.mvp.presenter.HeadlinesPresenter;
+import com.feedhub.app.mvp.view.HeadlinesView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -25,22 +25,50 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import ru.melod1n.library.mvp.base.MvpConstants;
+import ru.melod1n.library.mvp.base.MvpFields;
 
-public class FragmentHeadlines extends BaseFragment {
-
-    private final String[] titles = new String[]{
-            "General",
-            "Health",
-            "Sport",
-            "Hi-tech",
-            "Miscellaneous"
-    };
+public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
 
     @BindView(R.id.headlinesPager)
     ViewPager2 viewPager;
 
     @BindView(R.id.headlinesTabs)
     TabLayout tabLayout;
+
+    private boolean needToDestroy;
+
+//    private ArrayMap<String, String> categories = new ArrayMap<>();
+//    private ArrayMap<String, ArrayList<Topic>> topics = new ArrayMap<>();
+
+    private List<String> titles = new ArrayList<>();
+
+    private boolean isPrepared;
+
+    private HeadlinesPresenter presenter;
+
+    private HeadlinesPagerAdapter adapter;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
+    @Override
+    public void setArguments(@Nullable Bundle args) {
+        super.setArguments(args);
+
+        if (args == null) return;
+
+        String sourceId = args.getString("sourceId", "_empty");
+
+        if (sourceId.equals("_empty")) return;
+
+        needToDestroy = true;
+
+        loadCategories(null, sourceId);
+    }
 
     @Nullable
     @Override
@@ -55,7 +83,43 @@ public class FragmentHeadlines extends BaseFragment {
 
         prepareToolbar();
         prepareViewPager();
-        prepareTabLayout();
+
+        presenter = new HeadlinesPresenter(this);
+
+        loadCategories(savedInstanceState, null);
+    }
+
+    void loadCategories() {
+        loadCategories(null, null);
+    }
+
+    private void loadCategories(Bundle savedInstanceState, @Nullable String sourceId) {
+        if (savedInstanceState == null && isAttached() || sourceId != null) {
+            MvpFields fields = new MvpFields()
+                    .put(MvpConstants.OFFSET, 0)
+                    .put(MvpConstants.COUNT, 30)
+                    .put(MvpConstants.FROM_CACHE, false);
+
+            if (sourceId != null) {
+                fields.put("sourceId", sourceId);
+            }
+
+            presenter.requestLoadValues(fields);
+        } else {
+            presenter.requestCachedData(new MvpFields()
+                    .put(MvpConstants.OFFSET, 0)
+                    .put(MvpConstants.COUNT, 30)
+                    .put(MvpConstants.FROM_CACHE, true));
+        }
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+
+        if (needToDestroy && hidden) {
+            loadCategories(null, null);
+        }
     }
 
     private void prepareToolbar() {
@@ -69,49 +133,108 @@ public class FragmentHeadlines extends BaseFragment {
     }
 
     private View.OnClickListener getAvatarClickListener() {
-        return v -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-
-            String[] items = new String[]{
-                    getString(R.string.navigation_settings)
-            };
-
-            builder.setItems(items, (dialog, which) -> {
-                switch (which) {
-                    case 0:
-                        openSettingsScreen();
-                        break;
-                }
-            });
-
-            builder.create().show();
-        };
+        return v -> ProfileBottomSheetDialog.show(getParentFragmentManager());
     }
 
-    private void openSettingsScreen() {
-        startActivity(new Intent(requireContext(), SettingsActivity.class));
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
     private void prepareViewPager() {
-        List<FragmentHeadlinesItem> fragments = new ArrayList<>();
-
-        for (String title : titles) {
-            fragments.add(FragmentHeadlinesItem.newInstance(title));
-        }
-
         viewPager.setUserInputEnabled(false);
         viewPager.setSaveEnabled(false);
-        viewPager.setAdapter(new HeadlinesPagerAdapter(this, fragments));
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
     }
 
     private void prepareTabLayout() {
+        for (Headline headline : adapter.items) {
+            titles.add(headline.title);
+        }
+
         TabLayoutMediator tabMediator = new TabLayoutMediator(tabLayout, viewPager, (this::onConfigureTab));
 
         tabMediator.attach();
     }
 
     private void onConfigureTab(TabLayout.Tab tab, int position) {
-        tab.setText(titles[position]);
+        tab.setText(titles.get(position));
+    }
+
+    @Override
+    public void prepareNoInternetView() {
+
+    }
+
+    @Override
+    public void prepareNoItemsView() {
+
+    }
+
+    @Override
+    public void prepareErrorView() {
+
+    }
+
+    @Override
+    public void showNoInternetView() {
+
+    }
+
+    @Override
+    public void hideNoInternetView() {
+
+    }
+
+    @Override
+    public void showNoItemsView() {
+
+    }
+
+    @Override
+    public void hideNoItemsView() {
+
+    }
+
+    @Override
+    public void showErrorView(Exception e) {
+
+    }
+
+    @Override
+    public void hideErrorView() {
+
+    }
+
+    @Override
+    public void startRefreshing() {
+
+    }
+
+    @Override
+    public void stopRefreshing() {
+
+    }
+
+    @Override
+    public void showProgressBar() {
+
+    }
+
+    @Override
+    public void hideProgressBar() {
+
+    }
+
+    @Override
+    public void insertValues(@NonNull MvpFields fields, @NonNull ArrayList<Headline> values) {
+        adapter = new HeadlinesPagerAdapter(this, values);
+        viewPager.setAdapter(adapter);
+
+        prepareTabLayout();
+    }
+
+    @Override
+    public void clearList() {
+
     }
 }

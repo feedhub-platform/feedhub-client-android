@@ -2,6 +2,6 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:color="?colorAccentAlpha" android:state_checked="true" />
-    <item android:drawable="?android:windowBackground" />
+    <item android:color="?android:windowBackground" />
 
 </selector>

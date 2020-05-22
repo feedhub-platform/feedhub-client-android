@@ -6,4 +6,7 @@
     android:layout_height="wrap_content"
     android:checkable="true"
     android:textColor="@drawable/fragment_headlines_item_chip_text"
-    app:chipStrokeWidth="1dp" />
+    app:chipBackgroundColor="@drawable/fragment_headlines_item_chip_background"
+    app:chipStrokeColor="@drawable/fragment_headlines_item_chip_stroke"
+    app:chipStrokeWidth="1dp"
+    app:rippleColor="?colorAccent" />

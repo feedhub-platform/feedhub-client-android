@@ -6,28 +6,34 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.fragment.FragmentHeadlinesItem;
+import com.feedhub.app.item.Headline;
 
 import java.util.List;
 
 public class HeadlinesPagerAdapter extends FragmentStateAdapter {
 
-    @NonNull
-    private List<FragmentHeadlinesItem> fragments;
+//    private ArrayMap<ArrayMap<String, String>, ArrayList<Topic>> items;
 
-    public HeadlinesPagerAdapter(BaseFragment fragment, @NonNull List<FragmentHeadlinesItem> fragments) {
+    public List<Headline> items;
+
+    public HeadlinesPagerAdapter(BaseFragment fragment, List<Headline> items) {
         super(fragment);
 
-        this.fragments = fragments;
+        this.items = items;
     }
 
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        return fragments.get(position);
+        Headline headline = items.get(position);
+
+        return FragmentHeadlinesItem.newInstance(
+                headline.id, headline.title, headline.topics
+        );
     }
 
     @Override
     public int getItemCount() {
-        return fragments.size();
+        return items.size();
     }
 }

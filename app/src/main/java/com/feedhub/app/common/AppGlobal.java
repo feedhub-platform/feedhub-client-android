@@ -11,7 +11,10 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
 import androidx.room.Room;
 
+import com.facebook.drawee.backends.pipeline.Fresco;
 import com.feedhub.app.R;
+
+import ru.melod1n.library.mvp.base.MvpBase;
 
 public class AppGlobal extends Application {
 
@@ -32,6 +35,8 @@ public class AppGlobal extends Application {
     public void onCreate() {
         super.onCreate();
 
+        Fresco.initialize(this);
+
         resources = getResources();
 
         database = Room
@@ -48,5 +53,7 @@ public class AppGlobal extends Application {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
 
         colorAccent = resources.getColor(R.color.accent, null);
+
+        MvpBase.init(handler);
     }
 }
