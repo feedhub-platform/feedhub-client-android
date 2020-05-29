@@ -12,6 +12,7 @@
         <item name="android:navigationBarColor" tools:targetApi="o_mr1">?colorPrimary</item>
         <item name="tabIndicatorColor">?colorAccent</item>
         <item name="tabSelectedTextColor">?tabIndicatorColor</item>
+        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheet</item>
     </style>
 
 </resources>

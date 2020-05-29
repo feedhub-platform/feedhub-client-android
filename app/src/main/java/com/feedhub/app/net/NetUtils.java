@@ -6,8 +6,9 @@ public class NetUtils {
 
     private final static String PROTOCOL_HTML = "https://";
 
+    @NonNull
     public static String transformUrl(@NonNull String url) {
-        if (url.contains(PROTOCOL_HTML)) return url;
+        if (url.contains(PROTOCOL_HTML) || url.isEmpty()) return url;
 
         StringBuilder builder = new StringBuilder(PROTOCOL_HTML);
         builder.append(url);

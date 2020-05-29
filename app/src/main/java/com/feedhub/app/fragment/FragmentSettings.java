@@ -9,6 +9,7 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.feedhub.app.R;
 import com.feedhub.app.common.AppGlobal;
+import com.feedhub.app.net.RequestBuilder;
 
 import java.util.Objects;
 
@@ -50,6 +51,11 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         switch (preference.getKey()) {
             case KEY_SERVER_URL:
+                setPreferenceValueSummary(preference.getKey(), (String) newValue);
+
+                RequestBuilder.updateBaseUrl((String) newValue);
+                requireActivity().recreate();
+                break;
             case KEY_NEWS_KEY:
             case KEY_CATEGORY_KEY:
             case KEY_TOPICS_KEY:

@@ -74,7 +74,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 //                .commit();
 
 
-        container.animate().alpha(1).setDuration(1250).withEndAction(() -> {
+        container.animate().alpha(1).setDuration(500).withEndAction(() -> {
             container.setClickable(true);
             container.setFocusable(true);
         }).start();
@@ -90,10 +90,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
             case R.id.navigationHeadlines:
                 replaceFragment(fragmentHeadlines);
                 return true;
-            case R.id.navigationFollowing:
+            case R.id.navigationSubscriptions:
                 replaceFragment(fragmentFollowing);
                 return true;
-            case R.id.navigationSaved:
+            case R.id.navigationFavorites:
                 replaceFragment(fragmentSaved);
                 return true;
             case R.id.navigationSources:
