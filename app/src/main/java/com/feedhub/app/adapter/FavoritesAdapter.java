@@ -13,7 +13,7 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import com.feedhub.app.R;
 import com.feedhub.app.current.BaseAdapter;
 import com.feedhub.app.current.BaseHolder;
-import com.feedhub.app.item.News;
+import com.feedhub.app.item.Favorite;
 import com.feedhub.app.util.StringUtils;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
@@ -24,9 +24,9 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
+public class FavoritesAdapter extends BaseAdapter<Favorite, FavoritesAdapter.ItemHolder> {
 
-    public NewsAdapter(@NonNull Context context, @NonNull ArrayList<News> values) {
+    public FavoritesAdapter(@NonNull Context context, @NonNull ArrayList<Favorite> values) {
         super(context, values);
     }
 
@@ -75,7 +75,7 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         public void bind(int position) {
             currentPosition = position;
 
-            News item = getItem(position);
+            Favorite item = getItem(position);
 
             language.setText(item.language.toUpperCase());
 
@@ -93,6 +93,7 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
 
             if (TextUtils.isEmpty(sPicture)) {
                 widePicture.setVisibility(View.GONE);
+
                 picture.setVisibility(View.GONE);
             } else {
                 widePicture.setImageURI(Uri.parse(sPicture));

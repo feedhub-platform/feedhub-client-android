@@ -9,10 +9,10 @@ import androidx.fragment.app.Fragment;
 
 import com.feedhub.app.R;
 import com.feedhub.app.current.BaseActivity;
-import com.feedhub.app.fragment.FragmentFollowing;
-import com.feedhub.app.fragment.FragmentGeneral;
+import com.feedhub.app.fragment.FragmentNews;
+import com.feedhub.app.fragment.FragmentSubscriptions;
 import com.feedhub.app.fragment.FragmentHeadlines;
-import com.feedhub.app.fragment.FragmentSaved;
+import com.feedhub.app.fragment.FragmentFavorites;
 import com.feedhub.app.fragment.FragmentSources;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -24,9 +24,9 @@ import ru.melod1n.library.fragment.FragmentSwitcher;
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     public final FragmentHeadlines fragmentHeadlines = new FragmentHeadlines();
-    private final FragmentGeneral fragmentGeneral = new FragmentGeneral();
-    private final FragmentFollowing fragmentFollowing = new FragmentFollowing();
-    private final FragmentSaved fragmentSaved = new FragmentSaved();
+    private final FragmentNews fragmentNews = new FragmentNews();
+    private final FragmentSubscriptions fragmentSubscriptions = new FragmentSubscriptions();
+    private final FragmentFavorites fragmentFavorites = new FragmentFavorites();
     private final FragmentSources fragmentSources = new FragmentSources();
 
     @BindView(R.id.bottomNavigationView)
@@ -45,7 +45,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
         prepareFragments();
 
-        replaceFragment(fragmentGeneral);
+        replaceFragment(fragmentNews);
     }
 
     private void prepareFragments() {
@@ -60,10 +60,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         FragmentSwitcher.addFragments(
                 getSupportFragmentManager(),
                 containerId,
-                Arrays.asList(fragmentGeneral, fragmentHeadlines, fragmentFollowing, fragmentSaved, fragmentSources)
+                Arrays.asList(fragmentNews, fragmentHeadlines, fragmentSubscriptions, fragmentFavorites, fragmentSources)
         );
 
-        FragmentSwitcher.showFragment(getSupportFragmentManager(), fragmentGeneral.getClass().getSimpleName(), null, true);
+        FragmentSwitcher.showFragment(getSupportFragmentManager(), fragmentNews.getClass().getSimpleName(), null, true);
 
 //        getSupportFragmentManager()
 //                .beginTransaction()
@@ -85,16 +85,16 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.navigationGeneral:
-                replaceFragment(fragmentGeneral);
+                replaceFragment(fragmentNews);
                 return true;
             case R.id.navigationHeadlines:
                 replaceFragment(fragmentHeadlines);
                 return true;
             case R.id.navigationSubscriptions:
-                replaceFragment(fragmentFollowing);
+                replaceFragment(fragmentSubscriptions);
                 return true;
             case R.id.navigationFavorites:
-                replaceFragment(fragmentSaved);
+                replaceFragment(fragmentFavorites);
                 return true;
             case R.id.navigationSources:
                 replaceFragment(fragmentSources);

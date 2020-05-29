@@ -96,6 +96,8 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         prepareRecyclerView();
         prepareChipGroup();
 
+        parentFragment().showProgressBar();
+
         loadData();
     }
 
@@ -140,7 +142,7 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
     private void loadData() {
         RequestBuilder builder = RequestBuilder.create()
-                .method(AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, ""))
+                .method("news")
                 .put("category", categoryId);
 
         if (!selectedTopic.isEmpty())
@@ -164,6 +166,7 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
             @Override
             public void onError(Exception e) {
+                parentFragment().hideProgressBar();
             }
         });
 //        TaskManager.execute(() -> {
@@ -205,11 +208,17 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         if (adapter == null) {
             adapter = new HeadlineAdapter(requireContext(), news);
             recyclerView.setAdapter(adapter);
+
+            parentFragment().hideProgressBar();
             return;
         }
 
         adapter.changeItems(news);
         adapter.notifyDataSetChanged();
+    }
+
+    private FragmentHeadlines parentFragment() {
+        return (FragmentHeadlines) getParentFragment();
     }
 
     private void refreshData() {

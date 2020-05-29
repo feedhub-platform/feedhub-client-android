@@ -1,13 +1,17 @@
 package com.feedhub.app.fragment;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.TaskStackBuilder;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.feedhub.app.R;
+import com.feedhub.app.activity.MainActivity;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.net.RequestBuilder;
 
@@ -29,12 +33,15 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
 
         Preference newsKey = Objects.requireNonNull(findPreference(KEY_NEWS_KEY));
         setPreferenceValueSummary(KEY_NEWS_KEY, null);
+        newsKey.setEnabled(false);
 
         Preference categoryKey = Objects.requireNonNull(findPreference(KEY_CATEGORY_KEY));
         setPreferenceValueSummary(KEY_CATEGORY_KEY, null);
+        categoryKey.setEnabled(false);
 
         Preference topicsKey = Objects.requireNonNull(findPreference(KEY_TOPICS_KEY));
         setPreferenceValueSummary(KEY_TOPICS_KEY, null);
+        topicsKey.setEnabled(false);
 
         serverUrl.setOnPreferenceChangeListener(this);
         newsKey.setOnPreferenceChangeListener(this);
@@ -49,20 +56,33 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
 
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
+        if (preference.getKey().equals(KEY_SERVER_URL)) {
+            RequestBuilder.updateBaseUrl((String) newValue);
+        }
+
         switch (preference.getKey()) {
             case KEY_SERVER_URL:
-                setPreferenceValueSummary(preference.getKey(), (String) newValue);
-
-                RequestBuilder.updateBaseUrl((String) newValue);
-                requireActivity().recreate();
-                break;
             case KEY_NEWS_KEY:
             case KEY_CATEGORY_KEY:
             case KEY_TOPICS_KEY:
                 setPreferenceValueSummary(preference.getKey(), (String) newValue);
+                restartActivities();
                 return true;
         }
         return false;
+    }
+
+    @SuppressLint("PrivateResource")
+    private void restartActivities() {
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(requireContext())
+                .addNextIntent(new Intent(requireContext(), MainActivity.class))
+                .addNextIntent(requireActivity().getIntent());
+
+        requireActivity().finishAffinity();
+
+        stackBuilder.startActivities();
+
+        requireActivity().overridePendingTransition(R.anim.abc_fade_in, R.anim.abc_fade_out);
     }
 
     private void setPreferenceValueSummary(@NonNull String key, @Nullable String value) {

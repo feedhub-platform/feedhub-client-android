@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,19 +37,12 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     @BindView(R.id.headlinesTabs)
     TabLayout tabLayout;
 
-    private boolean needToDestroy;
-
-//    private ArrayMap<String, String> categories = new ArrayMap<>();
-//    private ArrayMap<String, ArrayList<Topic>> topics = new ArrayMap<>();
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
     private List<String> titles = new ArrayList<>();
-
-    private boolean isPrepared;
-
     private HeadlinesPresenter presenter;
-
     private HeadlinesPagerAdapter adapter;
-
     private String sourceId;
 
     public static FragmentHeadlines newInstance(@NonNull Bundle arguments) {
@@ -110,15 +104,6 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
         }
     }
 
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-
-        if (needToDestroy && hidden) {
-            loadCategories(null);
-        }
-    }
-
     private void prepareToolbar() {
         initToolbar(R.id.toolbar);
 
@@ -139,7 +124,7 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     }
 
     private void prepareViewPager() {
-        viewPager.setUserInputEnabled(false);
+//        viewPager.setUserInputEnabled(false);
         viewPager.setSaveEnabled(false);
     }
 
@@ -164,71 +149,62 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
 
     @Override
     public void prepareNoInternetView() {
-
     }
 
     @Override
     public void prepareNoItemsView() {
-
     }
 
     @Override
     public void prepareErrorView() {
-
     }
 
     @Override
     public void showNoInternetView() {
-
     }
 
     @Override
     public void hideNoInternetView() {
-
     }
 
     @Override
     public void showNoItemsView() {
-
     }
 
     @Override
     public void hideNoItemsView() {
-
     }
 
     @Override
     public void showErrorView(Exception e) {
-
     }
 
     @Override
     public void hideErrorView() {
-
     }
 
     @Override
     public void startRefreshing() {
-
     }
 
     @Override
     public void stopRefreshing() {
-
     }
 
     @Override
     public void showProgressBar() {
-
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hideProgressBar() {
-
+        progressBar.setVisibility(View.GONE);
     }
 
     @Override
     public void insertValues(@NonNull MvpFields fields, @NonNull ArrayList<Headline> values) {
+        if (!isAttached()) return;
+
         adapter = new HeadlinesPagerAdapter(this, values);
         viewPager.setAdapter(adapter);
 
@@ -237,6 +213,5 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
 
     @Override
     public void clearList() {
-
     }
 }

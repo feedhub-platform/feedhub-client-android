@@ -1,5 +1,6 @@
 package com.feedhub.app.fragment;
 
+import android.app.AlertDialog;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,8 +18,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.feedhub.app.R;
 import com.feedhub.app.adapter.NewsAdapter;
+import com.feedhub.app.common.AppGlobal;
+import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.current.BaseFragment;
+import com.feedhub.app.dao.FavoritesDao;
 import com.feedhub.app.dialog.ProfileBottomSheetDialog;
+import com.feedhub.app.item.Favorite;
 import com.feedhub.app.item.News;
 import com.feedhub.app.mvp.presenter.NewsPresenter;
 import com.feedhub.app.mvp.view.NewsView;
@@ -32,7 +37,7 @@ import ru.melod1n.library.mvp.base.MvpConstants;
 import ru.melod1n.library.mvp.base.MvpException;
 import ru.melod1n.library.mvp.base.MvpFields;
 
-public class FragmentGeneral extends BaseFragment implements NewsView, SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener {
+public class FragmentNews extends BaseFragment implements NewsView, SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener, NewsAdapter.OnItemLongClickListener {
 
     private static final int NEWS_COUNT = 10;
 
@@ -48,14 +53,16 @@ public class FragmentGeneral extends BaseFragment implements NewsView, SwipeRefr
     @NonNull
     private NewsPresenter presenter;
 
-    public FragmentGeneral() {
+    private FavoritesDao favoritesDao = AppGlobal.database.favoritesDao();
+
+    public FragmentNews() {
         presenter = new NewsPresenter(this);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_general, container, false);
+        return inflater.inflate(R.layout.fragment_news, container, false);
     }
 
     @Override
@@ -147,6 +154,32 @@ public class FragmentGeneral extends BaseFragment implements NewsView, SwipeRefr
     }
 
     @Override
+    public void onItemLongClick(int position) {
+        if (adapter == null) return;
+
+        News news = adapter.getItem(position);
+
+        String[] items = new String[]{
+                "Add to favorites"
+        };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setItems(items, (dialog, which) ->
+                TaskManager.execute(() -> {
+                    try {
+                        Favorite favorite = new Favorite(news);
+                        favoritesDao.insert(favorite);
+                        requireActivity().runOnUiThread(() -> {
+                            Toast.makeText(requireContext(), "Added to favorites", Toast.LENGTH_SHORT).show();
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }));
+        builder.show();
+    }
+
+    @Override
     public void prepareNoInternetView() {
 
     }
@@ -228,6 +261,7 @@ public class FragmentGeneral extends BaseFragment implements NewsView, SwipeRefr
         if (adapter == null) {
             adapter = new NewsAdapter(requireContext(), values);
             adapter.setOnItemClickListener(this);
+            adapter.setOnItemLongClickListener(this);
 
             recyclerView.setAdapter(adapter);
             return;
