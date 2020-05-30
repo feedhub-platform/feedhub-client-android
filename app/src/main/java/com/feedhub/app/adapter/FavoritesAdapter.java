@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,14 +27,24 @@ import butterknife.ButterKnife;
 
 public class FavoritesAdapter extends BaseAdapter<Favorite, FavoritesAdapter.ItemHolder> {
 
+    private OnMoreClickListener onMoreClickListener;
+
     public FavoritesAdapter(@NonNull Context context, @NonNull ArrayList<Favorite> values) {
         super(context, values);
+    }
+
+    public void setOnMoreClickListener(OnMoreClickListener onMoreClickListener) {
+        this.onMoreClickListener = onMoreClickListener;
     }
 
     @NonNull
     @Override
     public ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         return new ItemHolder(view(R.layout.item_news, parent));
+    }
+
+    public interface OnMoreClickListener {
+        void onClick(View view, int position);
     }
 
     class ItemHolder extends BaseHolder {
@@ -64,6 +75,9 @@ public class FavoritesAdapter extends BaseAdapter<Favorite, FavoritesAdapter.Ite
 
         @BindView(R.id.newsOriginTitle)
         Chip originTitle;
+
+        @BindView(R.id.newsMore)
+        ImageButton more;
 
         ItemHolder(@NonNull View v) {
             super(v);
@@ -98,6 +112,10 @@ public class FavoritesAdapter extends BaseAdapter<Favorite, FavoritesAdapter.Ite
             } else {
                 widePicture.setImageURI(Uri.parse(sPicture));
             }
+
+            more.setOnClickListener(v -> {
+                if (onMoreClickListener != null) onMoreClickListener.onClick(v, position);
+            });
         }
     }
 }

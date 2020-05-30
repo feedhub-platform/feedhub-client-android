@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey;
 public class Favorite {
 
     @NonNull
-    @PrimaryKey()
+    @PrimaryKey
     public String id = "";
 
     public String title;
@@ -24,19 +24,12 @@ public class Favorite {
 
     @Ignore
     public Favorite(News news) {
-        this.id = id;
+        this.id = news.id;
         this.body = news.body;
         this.language = news.language;
         this.originTitle = news.originTitle;
         this.originUrl = news.originUrl;
         this.picture = news.picture;
         this.title = news.title;
-    }
-
-    @Ignore
-    public Favorite(String title, String body, String picture) {
-        this.title = title;
-        this.body = body;
-        this.picture = picture;
     }
 }

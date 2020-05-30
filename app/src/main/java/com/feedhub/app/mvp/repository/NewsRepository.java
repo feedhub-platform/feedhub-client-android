@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Objects;
 
 import ru.melod1n.library.mvp.base.MvpConstants;
-import ru.melod1n.library.mvp.base.MvpException;
 import ru.melod1n.library.mvp.base.MvpFields;
 import ru.melod1n.library.mvp.base.MvpOnLoadListener;
 import ru.melod1n.library.mvp.base.MvpRepository;
@@ -97,13 +96,7 @@ public class NewsRepository extends MvpRepository<News> {
                 ArrayList<News> cachedValues = new ArrayList<>(newsDao.getAll());
                 ArrayUtils.prepareList(cachedValues, offset, count);
 
-                post(() -> {
-                    if (cachedValues.isEmpty()) {
-                        sendError(listener, MvpException.ERROR_EMPTY);
-                    } else {
-                        sendValuesToPresenter(fields, cachedValues, listener);
-                    }
-                });
+                post(() -> sendValuesToPresenter(fields, cachedValues, listener));
             } catch (Exception e) {
                 post(() -> sendError(listener, e));
             }

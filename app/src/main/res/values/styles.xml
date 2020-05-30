@@ -11,6 +11,7 @@
         <item name="tabRippleColor">?colorAccent</item>
         <item name="tabTextColor">?tabTextColor</item>
         <item name="tabSelectedTextColor">?tabSelectedTextColor</item>
+
     </style>
 
     <style name="AppTheme.Tab.Text" parent="TextAppearance.MaterialComponents.Body2">

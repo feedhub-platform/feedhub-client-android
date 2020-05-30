@@ -17,6 +17,7 @@
         android:layout_gravity="bottom"
         app:backgroundTint="?colorPrimary"
         app:elevation="8dp"
+        app:labelVisibilityMode="labeled"
         app:itemHorizontalTranslationEnabled="false"
         app:itemIconTint="@drawable/bottom_nav_view_colors"
         app:itemTextColor="@drawable/bottom_nav_view_colors"

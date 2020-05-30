@@ -1,6 +1,5 @@
 package com.feedhub.app.fragment;
 
-import android.app.AlertDialog;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -30,14 +30,14 @@ import com.feedhub.app.mvp.view.NewsView;
 import com.feedhub.app.util.AndroidUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ru.melod1n.library.mvp.base.MvpConstants;
-import ru.melod1n.library.mvp.base.MvpException;
 import ru.melod1n.library.mvp.base.MvpFields;
 
-public class FragmentNews extends BaseFragment implements NewsView, SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener, NewsAdapter.OnItemLongClickListener {
+public class FragmentNews extends BaseFragment implements NewsView, SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener {
 
     private static final int NEWS_COUNT = 10;
 
@@ -133,6 +133,69 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
         recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false));
     }
 
+    private void showMoreItems(View view, int position) {
+        if (adapter == null) return;
+
+        News news = adapter.getItem(position);
+
+        TaskManager.execute(() -> {
+            boolean alreadyIn = false;
+
+
+            List<Favorite> favorites = favoritesDao.getAll();
+
+            for (Favorite favorite : favorites) {
+                if (news.id.equals(favorite.id)) {
+                    alreadyIn = true;
+                    break;
+                }
+            }
+
+            boolean finalAlreadyIn = alreadyIn;
+
+            runOnUiThread(() -> {
+                PopupMenu popupMenu = new PopupMenu(requireContext(), view);
+                popupMenu.inflate(R.menu.fragment_news_more_popup);
+
+                if (finalAlreadyIn) {
+                    popupMenu.getMenu().findItem(R.id.moreAddToFavorites).setTitle(R.string.remove_from_favorites);
+                }
+
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    switch (item.getItemId()) {
+                        case R.id.moreAddToFavorites:
+                            TaskManager.execute(() -> {
+                                try {
+                                    Favorite favorite = new Favorite(news);
+
+                                    if (finalAlreadyIn) {
+                                        favoritesDao.delete(favorite);
+                                    } else {
+
+                                        favoritesDao.insert(favorite);
+                                    }
+
+
+                                    runOnUiThread(() -> Toast.makeText(
+                                            requireContext(),
+                                            finalAlreadyIn ? R.string.removed_from_favorites : R.string.added_to_favorites,
+                                            Toast.LENGTH_SHORT
+                                    ).show());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                            return true;
+                    }
+
+                    return false;
+                });
+
+                popupMenu.show();
+            });
+        });
+    }
+
     @Override
     public void onRefresh() {
         loadValues();
@@ -151,32 +214,6 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
                 .build();
 
         customTabsIntent.launchUrl(requireContext(), Uri.parse(news.originUrl));
-    }
-
-    @Override
-    public void onItemLongClick(int position) {
-        if (adapter == null) return;
-
-        News news = adapter.getItem(position);
-
-        String[] items = new String[]{
-                "Add to favorites"
-        };
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setItems(items, (dialog, which) ->
-                TaskManager.execute(() -> {
-                    try {
-                        Favorite favorite = new Favorite(news);
-                        favoritesDao.insert(favorite);
-                        requireActivity().runOnUiThread(() -> {
-                            Toast.makeText(requireContext(), "Added to favorites", Toast.LENGTH_SHORT).show();
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }));
-        builder.show();
     }
 
     @Override
@@ -218,10 +255,6 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
     @Override
     public void showErrorView(@Nullable Exception e) {
         if (e != null) {
-            if (e instanceof MvpException) {
-                if (((MvpException) e).errorId.equals(MvpException.ERROR_EMPTY)) return;
-            }
-
             if (getContext() != null)
                 Toast.makeText(requireContext(), getString(R.string.cause_exception, e.toString()), Toast.LENGTH_SHORT).show();
         }
@@ -261,7 +294,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
         if (adapter == null) {
             adapter = new NewsAdapter(requireContext(), values);
             adapter.setOnItemClickListener(this);
-            adapter.setOnItemLongClickListener(this);
+            adapter.setOnMoreClickListener(this::showMoreItems);
 
             recyclerView.setAdapter(adapter);
             return;

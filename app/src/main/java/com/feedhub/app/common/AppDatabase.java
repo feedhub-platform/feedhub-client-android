@@ -10,7 +10,7 @@ import com.feedhub.app.item.Favorite;
 import com.feedhub.app.item.Headline;
 import com.feedhub.app.item.News;
 
-@Database(entities = {News.class, Headline.class, Favorite.class}, version = 8, exportSchema = false)
+@Database(entities = {News.class, Headline.class, Favorite.class}, version = 9, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract NewsDao newsDao();
 

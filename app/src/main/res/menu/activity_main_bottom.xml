@@ -18,7 +18,8 @@
     <item
         android:id="@+id/navigationSubscriptions"
         android:icon="@drawable/ic_subscriptions"
-        android:title="@string/navigation_subscriptions" />
+        android:title="@string/navigation_subscriptions"
+        android:visible="false" />
 
     <item
         android:id="@+id/navigationFavorites"

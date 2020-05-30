@@ -25,13 +25,6 @@ public class News {
     }
 
     @Ignore
-    public News(String title, String body, String picture) {
-        this.title = title;
-        this.body = body;
-        this.picture = picture;
-    }
-
-    @Ignore
     public News(JSONObject o) {
         id = o.optString("id");
         title = o.optString("title");

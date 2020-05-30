@@ -9,7 +9,6 @@ import com.feedhub.app.item.Favorite;
 
 import java.util.ArrayList;
 
-import ru.melod1n.library.mvp.base.MvpException;
 import ru.melod1n.library.mvp.base.MvpFields;
 import ru.melod1n.library.mvp.base.MvpOnLoadListener;
 import ru.melod1n.library.mvp.base.MvpRepository;
@@ -24,13 +23,7 @@ public class FavoritesRepository extends MvpRepository<Favorite> {
             try {
                 ArrayList<Favorite> cachedValues = new ArrayList<>(dao.getAll());
 
-                post(() -> {
-                    if (cachedValues.isEmpty()) {
-                        sendError(listener, MvpException.ERROR_EMPTY);
-                    } else {
-                        sendValuesToPresenter(fields, cachedValues, listener);
-                    }
-                });
+                post(() -> sendValuesToPresenter(fields, cachedValues, listener));
             } catch (Exception e) {
                 post(() -> sendError(listener, e));
             }

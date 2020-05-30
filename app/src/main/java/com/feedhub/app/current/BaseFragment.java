@@ -10,9 +10,8 @@ import com.feedhub.app.widget.Toolbar;
 
 public abstract class BaseFragment extends Fragment {
 
-    private boolean isAttached;
-
     protected Toolbar toolbar;
+    private boolean isAttached;
 
     protected void initToolbar(@IdRes int resId) {
         toolbar = requireView().findViewById(resId);
@@ -36,5 +35,9 @@ public abstract class BaseFragment extends Fragment {
 
     public boolean isAttached() {
         return isAttached;
+    }
+
+    protected void runOnUiThread(Runnable runnable) {
+        requireActivity().runOnUiThread(runnable);
     }
 }

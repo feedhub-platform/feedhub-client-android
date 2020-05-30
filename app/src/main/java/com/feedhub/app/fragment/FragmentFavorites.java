@@ -5,9 +5,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -15,6 +17,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.feedhub.app.R;
 import com.feedhub.app.adapter.FavoritesAdapter;
 import com.feedhub.app.adapter.NewsAdapter;
+import com.feedhub.app.common.AppGlobal;
+import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.dialog.ProfileBottomSheetDialog;
 import com.feedhub.app.item.Favorite;
@@ -98,13 +102,40 @@ public class FragmentFavorites extends BaseFragment implements FavoritesView, Sw
         );
     }
 
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
+    private void removeFavorite(View view, int position) {
+        if (adapter == null) return;
 
-        if (hidden) {
-            loadData();
-        }
+        Favorite favorite = adapter.getItem(position);
+
+        PopupMenu popupMenu = new PopupMenu(requireContext(), view);
+        popupMenu.inflate(R.menu.fragment_favorites_more_popup);
+        popupMenu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.moreDeleteFromFavorites:
+                    TaskManager.execute(() -> {
+                        try {
+                            AppGlobal.database.favoritesDao().deleteById(favorite.id);
+                            runOnUiThread(() -> {
+                                Toast.makeText(requireContext(), R.string.removed_from_favorites, Toast.LENGTH_SHORT).show();
+
+                                if (adapter != null) {
+                                    adapter.remove(position);
+                                    adapter.notifyDataSetChanged();
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    return true;
+            }
+
+            return false;
+        });
+
+        popupMenu.show();
+
+
     }
 
     @Override
@@ -177,6 +208,8 @@ public class FragmentFavorites extends BaseFragment implements FavoritesView, Sw
         if (adapter == null) {
             adapter = new FavoritesAdapter(requireContext(), values);
             adapter.setOnItemClickListener(this);
+            adapter.setOnMoreClickListener(this::removeFavorite);
+
             recyclerView.setAdapter(adapter);
             return;
         }
@@ -185,6 +218,11 @@ public class FragmentFavorites extends BaseFragment implements FavoritesView, Sw
 
         if (offset > 0) {
             adapter.addAll(values);
+            return;
+        }
+
+        if (values.isEmpty()) {
+            adapter.clear();
         } else {
             adapter.changeItems(values);
         }

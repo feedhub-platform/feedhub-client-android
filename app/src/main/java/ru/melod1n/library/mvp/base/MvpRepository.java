@@ -17,12 +17,6 @@ public abstract class MvpRepository<T> {
 
     public void loadCachedValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<T> listener) {}
 
-    protected void sendError(@Nullable MvpOnLoadListener<T> listener, @NonNull String errorId) {
-        if (listener != null) {
-            listener.onErrorLoad(new MvpException(errorId));
-        }
-    }
-
     protected void sendError(@Nullable MvpOnLoadListener<T> listener, @Nullable Exception e) {
         if (listener != null && e != null) {
             MvpBase.handler.post(() -> listener.onErrorLoad(e));
