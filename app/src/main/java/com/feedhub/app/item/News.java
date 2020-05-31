@@ -7,8 +7,10 @@ import androidx.room.PrimaryKey;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
+
 @Entity
-public class News {
+public class News implements Serializable {
 
     @NonNull
     @PrimaryKey

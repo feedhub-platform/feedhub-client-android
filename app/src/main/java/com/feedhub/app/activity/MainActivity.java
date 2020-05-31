@@ -9,11 +9,11 @@ import androidx.fragment.app.Fragment;
 
 import com.feedhub.app.R;
 import com.feedhub.app.current.BaseActivity;
-import com.feedhub.app.fragment.FragmentNews;
-import com.feedhub.app.fragment.FragmentSubscriptions;
-import com.feedhub.app.fragment.FragmentHeadlines;
 import com.feedhub.app.fragment.FragmentFavorites;
+import com.feedhub.app.fragment.FragmentHeadlines;
+import com.feedhub.app.fragment.FragmentNews;
 import com.feedhub.app.fragment.FragmentSources;
+import com.feedhub.app.fragment.FragmentSubscriptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Arrays;

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">"FeedHub"</string>
+    <string name="navigation_general">"Главная"</string>
+    <string name="navigation_favorites">"Избранное"</string>
+    <string name="navigation_headlines">"Посты"</string>
+    <string name="navigation_subscriptions">"Подписки"</string>
+    <string name="navigation_settings">"Настройки"</string>
+    <string name="preference_server_url_title">"URL сервера"</string>
+    <string name="cause_exception">"Произошла ошибка: %s"</string>
+    <string name="preference_news_key_title">"Ключ новостей"</string>
+    <string name="preference_category_key_title">"Ключ категорий"</string>
+    <string name="preference_topics_key_title">"Ключ топиков"</string>
+    <string name="navigation_sources">"Источники"</string>
+    <string name="add_to_favorites">"Добавить в избранное"</string>
+    <string name="added_to_favorites">"Добавлено в избранное"</string>
+    <string name="remove_from_favorites">"Удалить из избранного"</string>
+    <string name="removed_from_favorites">"Удалено из избранного"</string>
+    <string name="open_post_confirmation">"Открыть пост?"</string>
+    <string name="dialog_yes">"Да"</string>
+    <string name="dialog_no">"Нет"</string>
+</resources>
