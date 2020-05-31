@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
@@ -207,13 +208,21 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
 
         News news = adapter.getItem(position);
 
-        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
-                .addDefaultShareMenuItem()
-                .setToolbarColor(ContextCompat.getColor(requireContext(), R.color.primary))
-                .setShowTitle(true)
-                .build();
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setMessage(R.string.open_post_confirmation);
+        builder.setPositiveButton(R.string.dialog_yes, (dialog, which) -> {
 
-        customTabsIntent.launchUrl(requireContext(), Uri.parse(news.originUrl));
+            CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
+                    .addDefaultShareMenuItem()
+                    .setToolbarColor(ContextCompat.getColor(requireContext(), R.color.primary))
+                    .setShowTitle(true)
+                    .build();
+
+            customTabsIntent.launchUrl(requireContext(), Uri.parse(news.originUrl));
+
+        });
+        builder.setNegativeButton(R.string.dialog_no, null);
+        builder.show();
     }
 
     @Override

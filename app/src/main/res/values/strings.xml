@@ -18,4 +18,7 @@
     <string name="added_to_favorites">Added to favorites</string>
     <string name="remove_from_favorites">Remove from favorites</string>
     <string name="removed_from_favorites">Removed from favorites</string>
+    <string name="open_post_confirmation">Open post?</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_no">No</string>
 </resources>

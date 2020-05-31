@@ -15,7 +15,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import ru.melod1n.library.mvp.base.MvpConstants;
@@ -25,7 +24,7 @@ import ru.melod1n.library.mvp.base.MvpRepository;
 
 public class NewsRepository extends MvpRepository<News> {
 
-    private NewsDao newsDao = AppGlobal.database.newsDao();
+    private NewsDao dao = AppGlobal.database.newsDao();
 
     @Override
     public void loadValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<News> listener) {
@@ -93,7 +92,7 @@ public class NewsRepository extends MvpRepository<News> {
 
         startNewThread(() -> {
             try {
-                ArrayList<News> cachedValues = new ArrayList<>(newsDao.getAll());
+                ArrayList<News> cachedValues = new ArrayList<>(dao.getAll());
                 ArrayUtils.prepareList(cachedValues, offset, count);
 
                 post(() -> sendValuesToPresenter(fields, cachedValues, listener));
@@ -105,18 +104,6 @@ public class NewsRepository extends MvpRepository<News> {
 
     @Override
     protected void cacheLoadedValues(@NonNull ArrayList<News> values) {
-        startNewThread(() -> {
-            List<News> cachedValues = newsDao.getAll();
-
-            if (cachedValues.isEmpty()) {
-                for (News news : values) {
-                    newsDao.insert(news);
-                }
-            } else {
-                for (News news : values) {
-                    newsDao.insert(news);
-                }
-            }
-        });
+        startNewThread(() -> dao.insert(values));
     }
 }
