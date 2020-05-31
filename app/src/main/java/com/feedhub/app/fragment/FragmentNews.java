@@ -12,7 +12,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -214,10 +213,10 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
 
             CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
                     .addDefaultShareMenuItem()
-                    .setToolbarColor(ContextCompat.getColor(requireContext(), R.color.primary))
                     .setShowTitle(true)
+                    .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
                     .build();
-
+            
             customTabsIntent.launchUrl(requireContext(), Uri.parse(news.originUrl));
 
         });
