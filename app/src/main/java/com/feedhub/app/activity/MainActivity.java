@@ -1,5 +1,6 @@
 package com.feedhub.app.activity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,6 +20,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.Arrays;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import ru.melod1n.library.fragment.FragmentSwitcher;
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
@@ -32,14 +34,12 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     @BindView(R.id.bottomNavigationView)
     BottomNavigationView navigationView;
 
-    public MainActivity() {
-        super(true);
-    }
-
+    @SuppressLint("PrivateResource")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         prepareBottomNavView();
 

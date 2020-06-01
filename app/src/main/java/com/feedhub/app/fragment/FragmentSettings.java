@@ -14,6 +14,7 @@ import com.feedhub.app.R;
 import com.feedhub.app.activity.MainActivity;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.net.RequestBuilder;
+import com.feedhub.app.util.Utils;
 
 import java.util.Objects;
 
@@ -23,6 +24,7 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
     public static final String KEY_NEWS_KEY = "news_key";
     public static final String KEY_CATEGORY_KEY = "category_key";
     public static final String KEY_TOPICS_KEY = "topics_key";
+    public static final String KEY_LANGUAGE = "language";
 
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
@@ -43,10 +45,14 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
         setPreferenceValueSummary(KEY_TOPICS_KEY, null);
         topicsKey.setEnabled(false);
 
+        Preference language = Objects.requireNonNull(findPreference(KEY_LANGUAGE));
+        setPreferenceValueSummary(KEY_LANGUAGE, null);
+
         serverUrl.setOnPreferenceChangeListener(this);
         newsKey.setOnPreferenceChangeListener(this);
         categoryKey.setOnPreferenceChangeListener(this);
         topicsKey.setOnPreferenceChangeListener(this);
+        language.setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -54,6 +60,7 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
         return false;
     }
 
+    @SuppressLint("PrivateResource")
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference.getKey().equals(KEY_SERVER_URL)) {
@@ -66,6 +73,17 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
             case KEY_CATEGORY_KEY:
             case KEY_TOPICS_KEY:
                 setPreferenceValueSummary(preference.getKey(), (String) newValue);
+                restartActivities();
+                return true;
+            case KEY_LANGUAGE:
+                Utils.changeLocale(
+                        requireActivity().getBaseContext(),
+                        (String) newValue
+                );
+
+                AppGlobal.updateLocale(requireActivity().getBaseContext(), (String) newValue);
+//                LocaleHelper.setLocale(requireContext(), (String) newValue);
+//                requireActivity().recreate();
                 restartActivities();
                 return true;
         }

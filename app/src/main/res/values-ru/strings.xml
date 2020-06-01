@@ -19,4 +19,8 @@
     <string name="open_post_confirmation">"Открыть пост?"</string>
     <string name="dialog_yes">"Да"</string>
     <string name="dialog_no">"Нет"</string>
+    <string name="english">"Английский"</string>
+    <string name="russian">"Русский"</string>
+    <string name="ukrainian">Украинский</string>
+    <string name="preference_language_title">Язык</string>
 </resources>

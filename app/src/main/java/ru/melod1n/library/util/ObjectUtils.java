@@ -1,4 +1,4 @@
-package ru.melod1n.library.utl;
+package ru.melod1n.library.util;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
