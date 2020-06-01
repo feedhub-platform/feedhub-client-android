@@ -1,12 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/scrollable_toolbar" />
+    <include
+        layout="@layout/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?actionBarSize" />
 
-    <include layout="@layout/recycler_view" />
+    <include layout="@layout/toolbar" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    <com.feedhub.app.widget.SearchBar
+        android:id="@+id/searchView"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_marginTop="?actionBarSize"
+        android:background="?colorPrimary"
+        android:gravity="center_vertical"
+        android:hint="Test"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:selectAllOnFocus="true"
+        android:text="TESTTTTT"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:textColor="?android:textColorPrimary"
+        android:visibility="gone" />
+
+</FrameLayout>

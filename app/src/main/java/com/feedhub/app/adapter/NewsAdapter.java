@@ -43,6 +43,12 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         return new ItemHolder(view(R.layout.item_news, parent));
     }
 
+    @Override
+    public boolean onQueryItem(@NonNull News item, @NonNull String lowerQuery) {
+        return item.title.toLowerCase().contains(lowerQuery) ||
+                item.body.toLowerCase().contains(lowerQuery);
+    }
+
     public interface OnMoreClickListener {
         void onClick(View view, int position);
     }

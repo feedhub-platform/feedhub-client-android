@@ -18,7 +18,10 @@ public abstract class BaseAdapter<T, VH extends BaseHolder>
     public OnItemLongClickListener onItemLongClickListener;
 
     protected Context context;
+
     protected ArrayList<T> values;
+    protected ArrayList<T> cleanValues;
+
     protected LayoutInflater inflater;
 
     public int currentPosition = -1;
@@ -59,6 +62,10 @@ public abstract class BaseAdapter<T, VH extends BaseHolder>
     @Override
     public int getItemCount() {
         return values.size();
+    }
+
+    public ArrayList<T> getValues() {
+        return values;
     }
 
     public void changeItems(ArrayList<T> values) {
@@ -123,6 +130,32 @@ public abstract class BaseAdapter<T, VH extends BaseHolder>
 
     public interface OnItemLongClickListener {
         void onItemLongClick(int position);
+    }
+
+    public void filter(String query) {
+        String lowerQuery = query.toLowerCase();
+
+        if (cleanValues == null) {
+            cleanValues = new ArrayList<>(values);
+        }
+
+        values.clear();
+
+        if (query.isEmpty()) {
+            values.addAll(cleanValues);
+        } else {
+            for (T value : cleanValues) {
+                if (onQueryItem(value, lowerQuery)) {
+                    values.add(value);
+                }
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
+    public boolean onQueryItem(@NonNull T item, @NonNull String lowerQuery) {
+        return false;
     }
 
 }

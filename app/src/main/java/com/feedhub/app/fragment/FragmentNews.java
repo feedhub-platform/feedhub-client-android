@@ -1,5 +1,6 @@
 package com.feedhub.app.fragment;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.Uri;
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.feedhub.app.R;
+import com.feedhub.app.activity.SearchActivity;
 import com.feedhub.app.activity.TaskActivity;
 import com.feedhub.app.adapter.NewsAdapter;
 import com.feedhub.app.common.AppGlobal;
@@ -31,6 +33,7 @@ import com.feedhub.app.item.News;
 import com.feedhub.app.mvp.presenter.NewsPresenter;
 import com.feedhub.app.mvp.view.NewsView;
 import com.feedhub.app.util.AndroidUtils;
+import com.feedhub.app.widget.SearchBar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,11 +47,15 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
 
     public static final int REQUEST_ADD_TO_FAVORITES = 1;
     private static final int NEWS_COUNT = 10;
+
     @BindView(R.id.refreshLayout)
     SwipeRefreshLayout refreshLayout;
 
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
+
+    @BindView(R.id.searchView)
+    SearchBar searchBar;
 
     @Nullable
     private NewsAdapter adapter;
@@ -60,6 +67,124 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
 
     public FragmentNews() {
         presenter = new NewsPresenter(this);
+    }
+
+    public static void openNewsPost(@NonNull NewsAdapter adapter, int position, @NonNull Activity activity) {
+        FavoritesDao favoritesDao = AppGlobal.database.favoritesDao();
+
+        News news = adapter.getItem(position);
+
+        TaskManager.execute(() -> {
+            boolean contains = false;
+
+            List<Favorite> favorites = favoritesDao.getAll();
+
+            for (Favorite favorite : favorites) {
+                if (news.id.equals(favorite.id)) {
+                    contains = true;
+                    break;
+                }
+            }
+
+            boolean finalContains = contains;
+
+            activity.runOnUiThread(() -> {
+                String label = "FeedHub: ";
+
+                label += activity.getString(finalContains ? R.string.remove_from_favorites : R.string.add_to_favorites);
+
+                Intent intent = new Intent(activity, TaskActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("news", news);
+                intent.putExtra("add", !finalContains);
+
+                PendingIntent pendingIntent = PendingIntent.getActivity(
+                        activity,
+                        REQUEST_ADD_TO_FAVORITES,
+                        intent,
+                        PendingIntent.FLAG_IMMUTABLE
+                );
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+                builder.setMessage(R.string.open_post_confirmation);
+
+                String finalLabel = label;
+                builder.setPositiveButton(R.string.dialog_yes, (dialog, which) -> {
+                    CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
+                            .addDefaultShareMenuItem()
+                            .setShowTitle(true)
+                            .addMenuItem(finalLabel, pendingIntent)
+                            .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
+                            .build();
+
+                    customTabsIntent.launchUrl(activity, Uri.parse(news.originUrl));
+                });
+                builder.setNegativeButton(R.string.dialog_no, null);
+                builder.show();
+            });
+        });
+    }
+
+    public static void showMoreItems(@NonNull NewsAdapter adapter, int position, @NonNull Activity activity, @NonNull View view) {
+        FavoritesDao favoritesDao = AppGlobal.database.favoritesDao();
+
+        News news = adapter.getItem(position);
+
+        TaskManager.execute(() -> {
+            boolean contains = false;
+
+            List<Favorite> favorites = favoritesDao.getAll();
+
+            for (Favorite favorite : favorites) {
+                if (news.id.equals(favorite.id)) {
+                    contains = true;
+                    break;
+                }
+            }
+
+            boolean finalContains = contains;
+
+            activity.runOnUiThread(() -> {
+                PopupMenu popupMenu = new PopupMenu(activity, view);
+                popupMenu.inflate(R.menu.fragment_news_more_popup);
+
+                if (finalContains) {
+                    popupMenu.getMenu().findItem(R.id.moreAddToFavorites).setTitle(R.string.remove_from_favorites);
+                }
+
+                popupMenu.setOnMenuItemClickListener(item -> {
+                    switch (item.getItemId()) {
+                        case R.id.moreAddToFavorites:
+                            TaskManager.execute(() -> {
+                                try {
+                                    Favorite favorite = new Favorite(news);
+
+                                    if (finalContains) {
+                                        favoritesDao.delete(favorite);
+                                    } else {
+
+                                        favoritesDao.insert(favorite);
+                                    }
+
+
+                                    activity.runOnUiThread(() -> Toast.makeText(
+                                            activity,
+                                            finalContains ? R.string.removed_from_favorites : R.string.added_to_favorites,
+                                            Toast.LENGTH_SHORT
+                                    ).show());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            });
+                            return true;
+                    }
+
+                    return false;
+                });
+
+                popupMenu.show();
+            });
+        });
     }
 
     @Nullable
@@ -77,6 +202,8 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
         prepareRefreshLayout();
         prepareRecyclerView();
 
+        prepareSearchView();
+
         loadCachedValues();
 
         if (AndroidUtils.hasConnection()) {
@@ -84,10 +211,24 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
         }
     }
 
+    private void prepareSearchView() {
+        searchBar.setOnQueryListener(lowerQuery -> {
+            if (adapter != null) {
+                adapter.filter(lowerQuery);
+            }
+        });
+    }
+
     private void prepareToolbar() {
         initToolbar(R.id.toolbar);
 
         toolbar.setNavigationClickListener(v -> {
+            if (adapter == null) return;
+
+            Intent intent = new Intent(requireContext(), SearchActivity.class);
+            intent.putExtra("items", adapter.getValues());
+
+            startActivity(intent);
         });
         toolbar.setNavigationIcon(R.drawable.ic_search);
         toolbar.setTitle(R.string.app_name);
@@ -139,63 +280,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
     private void showMoreItems(View view, int position) {
         if (adapter == null) return;
 
-        News news = adapter.getItem(position);
-
-        TaskManager.execute(() -> {
-            boolean contains = false;
-
-            List<Favorite> favorites = favoritesDao.getAll();
-
-            for (Favorite favorite : favorites) {
-                if (news.id.equals(favorite.id)) {
-                    contains = true;
-                    break;
-                }
-            }
-
-            boolean finalContains = contains;
-
-            runOnUiThread(() -> {
-                PopupMenu popupMenu = new PopupMenu(requireContext(), view);
-                popupMenu.inflate(R.menu.fragment_news_more_popup);
-
-                if (finalContains) {
-                    popupMenu.getMenu().findItem(R.id.moreAddToFavorites).setTitle(R.string.remove_from_favorites);
-                }
-
-                popupMenu.setOnMenuItemClickListener(item -> {
-                    switch (item.getItemId()) {
-                        case R.id.moreAddToFavorites:
-                            TaskManager.execute(() -> {
-                                try {
-                                    Favorite favorite = new Favorite(news);
-
-                                    if (finalContains) {
-                                        favoritesDao.delete(favorite);
-                                    } else {
-
-                                        favoritesDao.insert(favorite);
-                                    }
-
-
-                                    runOnUiThread(() -> Toast.makeText(
-                                            requireContext(),
-                                            finalContains ? R.string.removed_from_favorites : R.string.added_to_favorites,
-                                            Toast.LENGTH_SHORT
-                                    ).show());
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            });
-                            return true;
-                    }
-
-                    return false;
-                });
-
-                popupMenu.show();
-            });
-        });
+        FragmentNews.showMoreItems(adapter, position, requireActivity(), view);
     }
 
     @Override
@@ -207,57 +292,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
     public void onItemClick(int position) {
         if (adapter == null) return;
 
-        News news = adapter.getItem(position);
-
-        TaskManager.execute(() -> {
-            boolean contains = false;
-
-            List<Favorite> favorites = favoritesDao.getAll();
-
-            for (Favorite favorite : favorites) {
-                if (news.id.equals(favorite.id)) {
-                    contains = true;
-                    break;
-                }
-            }
-
-            boolean finalContains = contains;
-
-            runOnUiThread(() -> {
-                String label = "FeedHub: ";
-
-                label += getString(finalContains ? R.string.remove_from_favorites : R.string.add_to_favorites);
-
-                Intent intent = new Intent(requireContext(), TaskActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                intent.putExtra("news", news);
-                intent.putExtra("add", !finalContains);
-
-                PendingIntent pendingIntent = PendingIntent.getActivity(
-                        requireContext(),
-                        REQUEST_ADD_TO_FAVORITES,
-                        intent,
-                        PendingIntent.FLAG_IMMUTABLE
-                );
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                builder.setMessage(R.string.open_post_confirmation);
-
-                String finalLabel = label;
-                builder.setPositiveButton(R.string.dialog_yes, (dialog, which) -> {
-                    CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
-                            .addDefaultShareMenuItem()
-                            .setShowTitle(true)
-                            .addMenuItem(finalLabel, pendingIntent)
-                            .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
-                            .build();
-
-                    customTabsIntent.launchUrl(requireContext(), Uri.parse(news.originUrl));
-                });
-                builder.setNegativeButton(R.string.dialog_no, null);
-                builder.show();
-            });
-        });
+        FragmentNews.openNewsPost(adapter, position, requireActivity());
     }
 
     @Override

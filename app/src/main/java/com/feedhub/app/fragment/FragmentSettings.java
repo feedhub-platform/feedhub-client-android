@@ -83,7 +83,6 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
 
                 AppGlobal.updateLocale(requireActivity().getBaseContext(), (String) newValue);
 //                LocaleHelper.setLocale(requireContext(), (String) newValue);
-//                requireActivity().recreate();
                 restartActivities();
                 return true;
         }
