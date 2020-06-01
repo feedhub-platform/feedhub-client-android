@@ -71,6 +71,7 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        setRecyclerView(null);
 
         prepareToolbar();
         prepareViewPager();

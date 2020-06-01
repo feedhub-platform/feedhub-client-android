@@ -197,6 +197,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        setRecyclerView(recyclerView);
 
         prepareToolbar();
         prepareRefreshLayout();

@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 
 import com.feedhub.app.R;
 import com.feedhub.app.current.BaseActivity;
+import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.fragment.FragmentFavorites;
 import com.feedhub.app.fragment.FragmentHeadlines;
 import com.feedhub.app.fragment.FragmentNews;
@@ -109,7 +110,29 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     }
 
     private void onReselect(@NonNull MenuItem item) {
-        //empty
+        BaseFragment fragment = null;
+
+        switch (item.getItemId()) {
+            case R.id.navigationGeneral:
+                fragment = fragmentNews;
+                break;
+            case R.id.navigationHeadlines:
+                fragment = fragmentHeadlines;
+                break;
+            case R.id.navigationSubscriptions:
+                fragment = fragmentSubscriptions;
+                break;
+            case R.id.navigationFavorites:
+                fragment = fragmentFavorites;
+                break;
+            case R.id.navigationSources:
+                fragment = fragmentSources;
+                break;
+        }
+
+        if (fragment != null && fragment.getRecyclerView() != null) {
+            fragment.getRecyclerView().smoothScrollToPosition(0);
+        }
     }
 
     private void replaceFragment(Fragment fragment) {

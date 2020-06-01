@@ -50,6 +50,7 @@ public class FragmentSources extends BaseFragment implements SourcesView, Source
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        setRecyclerView(recyclerView);
 
         presenter = new SourcesPresenter(this);
 

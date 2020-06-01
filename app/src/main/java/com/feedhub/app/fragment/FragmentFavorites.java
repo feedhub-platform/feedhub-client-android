@@ -63,6 +63,7 @@ public class FragmentFavorites extends BaseFragment implements FavoritesView, Sw
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        setRecyclerView(recyclerView);
 
         prepareToolbar();
         prepareRefreshLayout();
