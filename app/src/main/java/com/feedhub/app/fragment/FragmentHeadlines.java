@@ -2,6 +2,7 @@ package com.feedhub.app.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.feedhub.app.adapter.HeadlinesPagerAdapter;
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.dialog.ProfileBottomSheetDialog;
 import com.feedhub.app.item.Headline;
+import com.feedhub.app.item.Topic;
 import com.feedhub.app.mvp.presenter.HeadlinesPresenter;
 import com.feedhub.app.mvp.view.HeadlinesView;
 import com.google.android.material.tabs.TabLayout;
@@ -28,6 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import ru.melod1n.library.mvp.base.MvpConstants;
 import ru.melod1n.library.mvp.base.MvpFields;
+import ru.melod1n.library.mvp.base.MvpOnLoadListener;
 
 public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
 
@@ -40,11 +43,16 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     @BindView(R.id.progressBar)
     ProgressBar progressBar;
 
+    String currentCategory;
+    int currentTopicId = -1;
+
     private List<String> titles = new ArrayList<>();
     private HeadlinesPresenter presenter;
     private HeadlinesPagerAdapter adapter;
     private String sourceId;
+    private String sourceTitle;
 
+    @NonNull
     public static FragmentHeadlines newInstance(@NonNull Bundle arguments) {
         FragmentHeadlines fragmentHeadlines = new FragmentHeadlines();
         fragmentHeadlines.setArguments(arguments);
@@ -58,6 +66,7 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
 
         if (getArguments() != null) {
             sourceId = getArguments().getString("sourceId", "_empty");
+            sourceTitle = getArguments().getString("sourceTitle", "");
         }
     }
 
@@ -78,30 +87,32 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
 
         presenter = new HeadlinesPresenter(this);
 
-        loadCategories(savedInstanceState);
+        loadCategories();
     }
 
     void loadCategories() {
-        loadCategories(null);
-    }
+        MvpFields fields = new MvpFields()
+                .put(MvpConstants.OFFSET, 0)
+                .put(MvpConstants.COUNT, 30)
+                .put(MvpConstants.FROM_CACHE, false);
 
-    private void loadCategories(Bundle savedInstanceState) {
-        if (savedInstanceState == null && isAttached()) {
-            MvpFields fields = new MvpFields()
-                    .put(MvpConstants.OFFSET, 0)
-                    .put(MvpConstants.COUNT, 30)
-                    .put(MvpConstants.FROM_CACHE, false);
-
-            if (sourceId != null && !"_empty".equals(sourceId)) {
-                fields.put("sourceId", sourceId);
-            }
-
+        if (sourceId != null && !"_empty".equals(sourceId)) {
+            fields.put("sourceId", sourceId);
             presenter.requestLoadValues(fields);
         } else {
-            presenter.requestCachedData(new MvpFields()
-                    .put(MvpConstants.OFFSET, 0)
-                    .put(MvpConstants.COUNT, 30)
-                    .put(MvpConstants.FROM_CACHE, true));
+            presenter.repository.loadTopics(new MvpOnLoadListener<ArrayMap<String, ArrayList<Topic>>>() {
+                @Override
+                public void onSuccessLoad(ArrayList<ArrayMap<String, ArrayList<Topic>>> values) {
+                    fields.put("topics", values.get(0));
+
+                    presenter.requestLoadValues(fields);
+                }
+
+                @Override
+                public void onErrorLoad(Exception e) {
+                    e.printStackTrace();
+                }
+            });
         }
     }
 
@@ -110,7 +121,7 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
 
         boolean useForSource = sourceId != null && !"_empty".equals(sourceId);
 
-        toolbar.setTitle(useForSource ? R.string.navigation_sources : R.string.app_name);
+        toolbar.setTitle(useForSource ? sourceTitle : getString(R.string.app_name));
         toolbar.setNavigationClickListener(v -> {
             if (useForSource) {
                 requireActivity().onBackPressed();
@@ -205,10 +216,34 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     public void insertValues(@NonNull MvpFields fields, @NonNull ArrayList<Headline> values) {
         if (!isAttached()) return;
 
-        adapter = new HeadlinesPagerAdapter(this, values);
+        ArrayMap<String, ArrayList<Topic>> data = new ArrayMap<>();
+
+        if (sourceTitle != null) {
+            for (Headline headline : values) {
+                data.put(headline.id, headline.topics);
+            }
+        }
+
+        adapter =
+                sourceId == null ?
+                        new HeadlinesPagerAdapter(this, values) :
+                        new HeadlinesPagerAdapter(this, values, sourceId, data);
+
         viewPager.setAdapter(adapter);
 
         prepareTabLayout();
+
+        if (currentCategory != null) {
+            for (int i = 0; i < tabLayout.getTabCount(); i++) {
+                TabLayout.Tab tab = tabLayout.getTabAt(i);
+
+                if (tab == null || tab.getText() == null) continue;
+
+                if (currentCategory.contentEquals(tab.getText())) {
+                    tabLayout.selectTab(tab);
+                }
+            }
+        }
     }
 
     @Override

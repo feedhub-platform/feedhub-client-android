@@ -55,7 +55,7 @@ public class NewsRepository extends MvpRepository<News> {
                     }
 
                     cacheLoadedValues(news);
-                    sendValuesToPresenter(fields, news, listener);
+                    sendValues(fields, news, listener);
                 } catch (Exception e) {
                     sendError(listener, e);
                 }
@@ -78,7 +78,7 @@ public class NewsRepository extends MvpRepository<News> {
                 ArrayList<News> cachedValues = new ArrayList<>(dao.getAll());
                 ArrayUtils.prepareList(cachedValues, offset, count);
 
-                post(() -> sendValuesToPresenter(fields, cachedValues, listener));
+                post(() -> sendValues(fields, cachedValues, listener));
             } catch (Exception e) {
                 post(() -> sendError(listener, e));
             }

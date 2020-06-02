@@ -2,6 +2,7 @@ package com.feedhub.app.fragment;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,7 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     @BindView(R.id.headlinesItemChip)
     ChipGroup chipGroup;
 
+    private String sourceId;
     private String categoryTitle;
     private String categoryId;
     private ArrayList<Topic> topics;
@@ -53,13 +55,34 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     private NewsAdapter adapter;
 
 
-    public static FragmentHeadlinesItem newInstance(String id, String title, ArrayList<Topic> topics) {
+    public static FragmentHeadlinesItem newInstance(String categoryId, String categoryTitle, ArrayList<Topic> topics) {
         FragmentHeadlinesItem fragment = new FragmentHeadlinesItem();
 
         Bundle bundle = new Bundle();
-        bundle.putString("title", title);
-        bundle.putString("id", id);
+        bundle.putString("categoryTitle", categoryTitle);
+        bundle.putString("categoryId", categoryId);
         bundle.putSerializable("topics", topics);
+
+        fragment.setArguments(bundle);
+
+        return fragment;
+    }
+
+    public static FragmentHeadlinesItem newInstance(String categoryId, String categoryTitle, String sourceId, ArrayMap<String, ArrayList<Topic>> topics) {
+        FragmentHeadlinesItem fragment = new FragmentHeadlinesItem();
+
+        Bundle bundle = new Bundle();
+        bundle.putString("categoryTitle", categoryTitle);
+        bundle.putString("categoryId", categoryId);
+        bundle.putString("sourceId", sourceId);
+
+        for (int i = 0; i < topics.size(); i++) {
+            String key = topics.keyAt(i);
+            if (categoryId.equals(key)) {
+                bundle.putSerializable("topics", topics.valueAt(i));
+                break;
+            }
+        }
 
         fragment.setArguments(bundle);
 
@@ -71,9 +94,13 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
 
+        FragmentHeadlines fragment = (FragmentHeadlines) requireParentFragment();
+        lastCheckedId = fragment.currentTopicId;
+
         if (getArguments() != null) {
-            categoryTitle = getArguments().getString("title", "");
-            categoryId = getArguments().getString("id", "");
+            categoryTitle = getArguments().getString("categoryTitle", "");
+            categoryId = getArguments().getString("categoryId", "");
+            sourceId = getArguments().getString("sourceId", "");
             topics = (ArrayList<Topic>) getArguments().getSerializable("topics");
         }
     }
@@ -142,12 +169,21 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
             loadData();
         });
+
+        if (lastCheckedId != -1) {
+            ((Chip) chipGroup.findViewById(lastCheckedId)).setChecked(true);
+            selectedTopic = topics.get(lastCheckedId).id;
+        }
     }
 
     private void loadData() {
         RequestBuilder builder = RequestBuilder.create()
                 .method("news")
                 .put("category", categoryId);
+
+        if (!sourceId.isEmpty()) {
+            builder.put("source", sourceId);
+        }
 
         if (!selectedTopic.isEmpty())
             builder.put("topic", selectedTopic);
@@ -206,6 +242,9 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
     private void refreshData() {
         FragmentHeadlines fragment = (FragmentHeadlines) requireParentFragment();
+        fragment.currentCategory = categoryTitle;
+        fragment.currentTopicId = lastCheckedId;
+
         fragment.loadCategories();
 
         loadData();

@@ -27,7 +27,7 @@ public abstract class MvpRepository<T> {
         }
     }
 
-    protected void sendValuesToPresenter(@NonNull MvpFields fields, @NonNull ArrayList<T> values, @Nullable MvpOnLoadListener<T> listener) {
+    protected void sendValues(@NonNull MvpFields fields, @NonNull ArrayList<T> values, @Nullable MvpOnLoadListener<T> listener) {
         if (listener != null) {
             MvpBase.handler.post(() -> listener.onSuccessLoad(values));
         }

@@ -280,7 +280,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
                 presenter.requestLoadValues(new MvpFields()
                         .put(MvpConstants.FROM_CACHE, false)
                         .put(MvpConstants.COUNT, 30)
-                        .put(MvpConstants.OFFSET, adapter.getItemCount()));
+                        .put(MvpConstants.OFFSET, adapter.getItemCount() - 1));
             }
         });
     }

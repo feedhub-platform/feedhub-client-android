@@ -16,6 +16,7 @@ public class SourcesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sources);
 
         Bundle args = new Bundle();
+        args.putString("sourceTitle", getIntent().getStringExtra("sourceTitle"));
         args.putString("sourceId", getIntent().getStringExtra("sourceId"));
 
         getSupportFragmentManager().beginTransaction()

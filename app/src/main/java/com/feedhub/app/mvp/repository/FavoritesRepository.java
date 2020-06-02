@@ -23,7 +23,7 @@ public class FavoritesRepository extends MvpRepository<Favorite> {
             try {
                 ArrayList<Favorite> cachedValues = new ArrayList<>(dao.getAll());
 
-                post(() -> sendValuesToPresenter(fields, cachedValues, listener));
+                post(() -> sendValues(fields, cachedValues, listener));
             } catch (Exception e) {
                 post(() -> sendError(listener, e));
             }

@@ -6,6 +6,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -93,7 +94,7 @@ public class Toolbar extends MaterialToolbar {
     }
 
     public void setAvatarIcon(@Nullable Drawable icon) {
-        ((ImageView) findViewById(R.id.toolbarAvatar)).setImageDrawable(icon);
+        ((ImageView) ((FrameLayout) findViewById(R.id.toolbarAvatar)).getChildAt(0)).setImageDrawable(icon);
     }
 
     public void setAvatarClickListener(@Nullable OnClickListener listener) {

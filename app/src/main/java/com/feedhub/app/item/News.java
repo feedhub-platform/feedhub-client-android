@@ -36,7 +36,7 @@ public class News extends BaseNewsItem {
     }
 
     @NonNull
-    public static List<News> parse(JSONArray jsonArray) {
+    public static List<News> parse(@NonNull JSONArray jsonArray) {
         List<News> list = new ArrayList<>();
 
         for (int i = 0; i < jsonArray.length(); i++) {

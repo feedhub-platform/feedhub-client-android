@@ -103,6 +103,7 @@ public class FragmentSources extends BaseFragment implements SourcesView, Source
         startActivity(
                 new Intent(requireContext(), SourcesActivity.class)
                         .putExtra("sourceId", source.id)
+                        .putExtra("sourceTitle", source.title)
         );
     }
 

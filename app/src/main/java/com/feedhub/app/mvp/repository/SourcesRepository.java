@@ -16,7 +16,7 @@ import ru.melod1n.library.mvp.base.MvpFields;
 import ru.melod1n.library.mvp.base.MvpOnLoadListener;
 import ru.melod1n.library.mvp.base.MvpRepository;
 
-public class SourceRepository extends MvpRepository<Source> {
+public class SourcesRepository extends MvpRepository<Source> {
 
     @Override
     public void loadValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<Source> listener) {
@@ -36,7 +36,7 @@ public class SourceRepository extends MvpRepository<Source> {
                                 values.add(new Source(jSource));
                             }
 
-                            sendValuesToPresenter(fields, values, listener);
+                            sendValues(fields, values, listener);
                         } catch (Exception e) {
                             sendError(listener, e);
                         }
