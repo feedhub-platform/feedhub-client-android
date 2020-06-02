@@ -28,61 +28,38 @@ public class NewsRepository extends MvpRepository<News> {
 
     @Override
     public void loadValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<News> listener) {
-        RequestBuilder.create()
-//                .baseUrl(prefs.getString(FragmentSettings.KEY_SERVER_URL, ""))
-                .method(prefs.getString(FragmentSettings.KEY_NEWS_KEY, ""))
-                .execute(new RequestBuilder.OnResponseListener<JSONObject>() {
-                    @Override
-                    public void onSuccess(JSONObject root) {
-                        try {
-                            JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-                            JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
+        int offset = fields.getNonNull(MvpConstants.OFFSET);
+        int count = fields.getNonNull(MvpConstants.COUNT);
 
-                            final ArrayList<News> news = new ArrayList<>();
+        RequestBuilder builder = RequestBuilder.create();
+        builder.put("offset", offset);
+        builder.put("limit", count);
+        builder.method(prefs.getString(FragmentSettings.KEY_NEWS_KEY, ""));
+        builder.execute(new RequestBuilder.OnResponseListener<JSONObject>() {
+            @Override
+            public void onSuccess(JSONObject root) {
+                try {
+                    JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+                    JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
 
-                            for (int i = 0; i < items.length(); i++) {
-                                news.add(new News(items.optJSONObject(i)));
-                            }
+                    final ArrayList<News> news = new ArrayList<>();
 
-                            cacheLoadedValues(news);
-                            sendValuesToPresenter(fields, news, listener);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-
-                            sendError(listener, e);
-                        }
+                    for (int i = 0; i < items.length(); i++) {
+                        news.add(new News(items.optJSONObject(i)));
                     }
 
-                    @Override
-                    public void onError(Exception e) {
-                        sendError(listener, e);
-                    }
-                });
+                    cacheLoadedValues(news);
+                    sendValuesToPresenter(fields, news, listener);
+                } catch (Exception e) {
+                    sendError(listener, e);
+                }
+            }
 
-//        String serverUrl =
-//                AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
-//                        AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, "");
-//
-//        TaskManager.execute(() -> {
-//            try {
-//                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
-//                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-//                JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
-//
-//                final ArrayList<News> news = new ArrayList<>();
-//
-//                for (int i = 0; i < items.length(); i++) {
-//                    news.add(new News(items.optJSONObject(i)));
-//                }
-//
-//                cacheLoadedValues(news);
-//                sendValuesToPresenter(fields, news, listener);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//
-//                sendError(listener, e);
-//            }
-//        });
+            @Override
+            public void onError(Exception e) {
+                sendError(listener, e);
+            }
+        });
     }
 
     @Override

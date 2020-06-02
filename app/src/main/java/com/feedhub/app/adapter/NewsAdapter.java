@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
+public class NewsAdapter extends BaseAdapter<News, BaseHolder> {
 
     private OnMoreClickListener onMoreClickListener;
 
@@ -37,9 +37,18 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         this.onMoreClickListener = onMoreClickListener;
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        if (getItem(position) == null) return TYPE_LOADING;
+
+        return super.getItemViewType(position);
+    }
+
     @NonNull
     @Override
-    public ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public BaseHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_LOADING) return new LoadingHolder(view(R.layout.item_loading, parent));
+
         return new ItemHolder(view(R.layout.item_news, parent));
     }
 
@@ -55,8 +64,8 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
 
     class ItemHolder extends BaseHolder {
 
-        private final int MAX_TITLE_LENGTH = 100;
-        private final int MAX_BODY_LENGTH = 400;
+        private static final int MAX_TITLE_LENGTH = 100;
+        private static final int MAX_BODY_LENGTH = 400;
 
         @BindView(R.id.newsRoot)
         View root;

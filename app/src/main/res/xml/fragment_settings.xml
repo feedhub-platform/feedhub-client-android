@@ -24,6 +24,14 @@
         app:key="topics_key"
         app:title="@string/preference_topics_key_title" />
 
+    <MultiSelectListPreference
+        app:defaultValue="@array/languages_values"
+        app:entries="@array/languages_entries"
+        app:entryValues="@array/languages_values"
+        app:iconSpaceReserved="false"
+        app:key="news_language"
+        app:title="@string/preference_news_language_title" />
+
     <ListPreference
         app:defaultValue="en"
         app:entries="@array/languages_entries"

@@ -91,6 +91,7 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        setRecyclerView(recyclerView);
 
         prepareRefreshLayout();
         prepareRecyclerView();

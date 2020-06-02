@@ -42,11 +42,12 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import ru.melod1n.library.mvp.base.MvpConstants;
 import ru.melod1n.library.mvp.base.MvpFields;
+import ru.melod1n.library.recyclerview.EndlessScrollListener;
 
 public class FragmentNews extends BaseFragment implements NewsView, SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener {
 
     public static final int REQUEST_ADD_TO_FAVORITES = 1;
-    private static final int NEWS_COUNT = 10;
+    private static final int NEWS_COUNT = 30;
 
     @BindView(R.id.refreshLayout)
     SwipeRefreshLayout refreshLayout;
@@ -278,6 +279,47 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
         recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false));
     }
 
+    private void initScrollListener(@NonNull NewsAdapter adapter) {
+        recyclerView.addOnScrollListener(new EndlessScrollListener<NewsAdapter>(adapter) {
+
+            @Override
+            public void onLoadMore() {
+                adapter.add(null);
+//                adapter.notifyItemInserted(adapter.getItemCount() - 1);
+
+//                if (!recyclerView.isComputingLayout())
+//                    adapter.notifyDataSetChanged();
+
+                presenter.requestLoadValues(new MvpFields()
+                        .put(MvpConstants.FROM_CACHE, false)
+                        .put(MvpConstants.COUNT, 30)
+                        .put(MvpConstants.OFFSET, adapter.getItemCount()));
+
+//                AppGlobal.handler.postDelayed(() -> {
+//                    adapter.remove(adapter.getItemCount() - 1);
+//
+//                    int scrollPosition = adapter.getItemCount();
+//
+//                    adapter.notifyItemRemoved(scrollPosition);
+//
+//                    int currentSize = scrollPosition;
+//                    int nextLimit = currentSize + 10;
+//
+//                    int i = 0;
+//
+//                    while (currentSize - 1 < nextLimit) {
+//                        adapter.add(adapter.getValues().get(i));
+//                        currentSize++;
+//                        i++;
+//                    }
+//
+//                    adapter.notifyDataSetChanged();
+//                    onLoadEndListener.onLoadEnd();
+//                }, 2000);
+            }
+        });
+    }
+
     private void showMoreItems(View view, int position) {
         if (adapter == null) return;
 
@@ -377,11 +419,18 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
             adapter.setOnMoreClickListener(this::showMoreItems);
 
             recyclerView.setAdapter(adapter);
+            initScrollListener(adapter);
             return;
+        }
+
+        if (adapter.isLoading) {
+            adapter.remove(null);
+            adapter.isLoading = false;
         }
 
         if (offset > 0) {
             adapter.addAll(values);
+            adapter.notifyDataSetChanged();
             return;
         }
 

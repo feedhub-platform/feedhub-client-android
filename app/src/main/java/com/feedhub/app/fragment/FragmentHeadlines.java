@@ -125,7 +125,6 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     }
 
     private void prepareViewPager() {
-//        viewPager.setUserInputEnabled(false);
         viewPager.setSaveEnabled(false);
     }
 
@@ -144,7 +143,7 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
         tabMediator.attach();
     }
 
-    private void onConfigureTab(TabLayout.Tab tab, int position) {
+    private void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
         tab.setText(titles.get(position));
     }
 

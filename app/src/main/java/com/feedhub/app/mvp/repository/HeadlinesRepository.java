@@ -1,7 +1,6 @@
 package com.feedhub.app.mvp.repository;
 
 import android.util.ArrayMap;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -35,43 +34,42 @@ public class HeadlinesRepository extends MvpRepository<Headline> {
             builder.execute(new RequestBuilder.OnResponseListener<JSONObject>() {
                 @Override
                 public void onSuccess(JSONObject root) {
-                    Log.d("RESPONSE", root.toString());
+                    try {
+                        JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+                        JSONArray categories = Objects.requireNonNull(response.optJSONArray("categories"));
+                        JSONArray topics = Objects.requireNonNull(response.optJSONArray("topics"));
 
-                    JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-                    JSONArray categories = Objects.requireNonNull(response.optJSONArray("categories"));
-                    JSONArray categoriesTopics = Objects.requireNonNull(response.optJSONArray("topics"));
+                        ArrayList<Headline> headlines = new ArrayList<>();
 
-                    ArrayMap<String, String> idsTitles = new ArrayMap<>();
-                    ArrayList<Headline> headlines = new ArrayList<>();
+                        for (int i = 0; i < categories.length(); i++) {
+                            JSONObject category = categories.optJSONObject(i);
 
-                    for (int i = 0; i < categories.length(); i++) {
-//                        JSONObject category = Objects.requireNonNull(categories.optJSONObject(i));
+                            String id = category.optString("id");
+                            String title = category.optString("title");
 
-                        String id = categories.optString(i);
-//                        String id = category.optString("id");
-                        String title = id.substring(0, 1).toUpperCase() + id.substring(1);
-//                        String title = category.optString("title");
+                            ArrayList<Topic> mTopics = new ArrayList<>();
 
-                        idsTitles.put(id, title);
+                            JSONObject topic = topics.optJSONObject(i);
+                            if (topic != null) {
+                                JSONArray oTopics = Objects.requireNonNull(topic.optJSONArray("topics"));
 
-                        JSONObject categoryTopic = Objects.requireNonNull(categoriesTopics.optJSONObject(i));
-                        JSONArray jTopics = Objects.requireNonNull(categoryTopic.optJSONArray("topics"));
+                                for (int j = 0; j < oTopics.length(); j++) {
+                                    mTopics.add(new Topic(oTopics.optJSONObject(j)));
+                                }
+                            }
 
-                        ArrayList<Topic> topics = new ArrayList<>();
+                            Headline headline = new Headline();
+                            headline.id = id;
+                            headline.title = title;
+                            headline.topics = mTopics;
 
-                        for (int j = 0; j < jTopics.length(); j++) {
-                            topics.add(new Topic(jTopics.optJSONObject(j)));
+                            headlines.add(headline);
                         }
 
-                        Headline headline = new Headline();
-                        headline.id = idsTitles.keyAt(i);
-                        headline.title = idsTitles.valueAt(i);
-                        headline.topics = topics;
-
-                        headlines.add(headline);
+                        sendValuesToPresenter(fields, headlines, listener);
+                    } catch (Exception e) {
+                        sendError(listener, e);
                     }
-
-                    sendValuesToPresenter(fields, headlines, listener);
                 }
 
                 @Override
@@ -85,8 +83,6 @@ public class HeadlinesRepository extends MvpRepository<Headline> {
         builder.execute(new RequestBuilder.OnResponseListener<JSONObject>() {
             @Override
             public void onSuccess(JSONObject root) {
-                Log.d("RESPONSE", root.toString());
-
                 JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
                 final JSONArray items = Objects.requireNonNull(response.optJSONArray("categories"));
 
@@ -102,7 +98,6 @@ public class HeadlinesRepository extends MvpRepository<Headline> {
                 }
 
                 RequestBuilder.create()
-//                .baseUrl(prefs.getString(FragmentSettings.KEY_SERVER_URL, ""))
                         .method(prefs.getString(FragmentSettings.KEY_TOPICS_KEY, ""))
                         .put("category", idsTitles.keySet().toArray())
                         .execute(new RequestBuilder.OnResponseListener<JSONObject>() {

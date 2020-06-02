@@ -16,6 +16,7 @@ import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.net.RequestBuilder;
 import com.feedhub.app.util.Utils;
 
+import java.util.HashSet;
 import java.util.Objects;
 
 public class FragmentSettings extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
@@ -25,6 +26,7 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
     public static final String KEY_CATEGORY_KEY = "category_key";
     public static final String KEY_TOPICS_KEY = "topics_key";
     public static final String KEY_LANGUAGE = "language";
+    public static final String KEY_NEWS_LANGUAGE = "news_language";
 
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
@@ -48,11 +50,14 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
         Preference language = Objects.requireNonNull(findPreference(KEY_LANGUAGE));
         setPreferenceValueSummary(KEY_LANGUAGE, null);
 
+        Preference newsLanguage = Objects.requireNonNull(findPreference(KEY_NEWS_LANGUAGE));
+
         serverUrl.setOnPreferenceChangeListener(this);
         newsKey.setOnPreferenceChangeListener(this);
         categoryKey.setOnPreferenceChangeListener(this);
         topicsKey.setOnPreferenceChangeListener(this);
         language.setOnPreferenceChangeListener(this);
+        newsLanguage.setOnPreferenceChangeListener(this);
     }
 
     @Override
@@ -85,6 +90,9 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
 //                LocaleHelper.setLocale(requireContext(), (String) newValue);
                 restartActivities();
                 return true;
+            case KEY_NEWS_LANGUAGE:
+                HashSet<String> values = (HashSet<String>) newValue;
+                return true;
         }
         return false;
     }
@@ -107,7 +115,6 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
 
         setPreferenceSummary(key, summary);
     }
-
 
     private void setPreferenceSummary(@NonNull String preferenceKey, @Nullable String summary) {
         Preference preference = findPreference(preferenceKey);

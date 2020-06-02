@@ -25,17 +25,21 @@ public class SourceRepository extends MvpRepository<Source> {
                 .execute(new RequestBuilder.OnResponseListener<JSONObject>() {
                     @Override
                     public void onSuccess(JSONObject root) {
-                        JSONArray response = Objects.requireNonNull(root.optJSONArray("response"));
+                        try {
+                            JSONArray response = Objects.requireNonNull(root.optJSONArray("response"));
 
-                        ArrayList<Source> values = new ArrayList<>();
+                            ArrayList<Source> values = new ArrayList<>();
 
-                        for (int i = 0; i < response.length(); i++) {
-                            JSONObject jSource = response.optJSONObject(i);
+                            for (int i = 0; i < response.length(); i++) {
+                                JSONObject jSource = response.optJSONObject(i);
 
-                            values.add(new Source(jSource));
+                                values.add(new Source(jSource));
+                            }
+
+                            sendValuesToPresenter(fields, values, listener);
+                        } catch (Exception e) {
+                            sendError(listener, e);
                         }
-
-                        sendValuesToPresenter(fields, values, listener);
                     }
 
                     @Override

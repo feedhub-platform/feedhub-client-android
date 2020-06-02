@@ -12,8 +12,6 @@ import java.util.List;
 
 public class HeadlinesPagerAdapter extends FragmentStateAdapter {
 
-//    private ArrayMap<ArrayMap<String, String>, ArrayList<Topic>> items;
-
     public List<Headline> items;
 
     public HeadlinesPagerAdapter(BaseFragment fragment, List<Headline> items) {
