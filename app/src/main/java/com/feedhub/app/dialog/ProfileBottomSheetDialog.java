@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.feedhub.app.R;
+import com.feedhub.app.activity.AboutActivity;
 import com.feedhub.app.activity.SettingsActivity;
 import com.feedhub.app.adapter.MainMenuAdapter;
 import com.feedhub.app.current.BaseAdapter;
@@ -30,12 +31,10 @@ public class ProfileBottomSheetDialog extends BottomSheetDialogFragment implemen
     private static final String TAG = "ProfileDialog";
 
     private static final String ID_SETTINGS = "_settings";
-
-    private BaseAdapter.OnItemClickListener listener;
-
+    private static final String ID_ABOUT = "_about";
     @BindView(R.id.bottomSheetItems)
     RecyclerView recyclerView;
-
+    private BaseAdapter.OnItemClickListener listener;
     private MainMenuAdapter adapter;
 
     public static void show(FragmentManager fragmentManager) {
@@ -64,6 +63,12 @@ public class ProfileBottomSheetDialog extends BottomSheetDialogFragment implemen
                 ContextCompat.getDrawable(requireContext(), R.drawable.ic_settings_outline)
         ));
 
+        items.add(new MainMenuItem(
+                ID_ABOUT,
+                getString(R.string.preference_about),
+                ContextCompat.getDrawable(requireContext(), R.drawable.ic_outline_info)
+        ));
+
         adapter = new MainMenuAdapter(requireContext(), items);
         adapter.setOnItemClickListener(this);
 
@@ -82,11 +87,17 @@ public class ProfileBottomSheetDialog extends BottomSheetDialogFragment implemen
         switch (item.id) {
             case ID_SETTINGS:
                 openSettingsScreen();
-                dismiss();
-                return;
+                break;
+            case ID_ABOUT:
+                openAboutScreen();
+                break;
         }
 
+        dismiss();
+    }
 
+    private void openAboutScreen() {
+        startActivity(new Intent(requireContext(), AboutActivity.class));
     }
 
     private void openSettingsScreen() {

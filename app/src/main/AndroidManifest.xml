@@ -37,6 +37,7 @@
             android:theme="@style/Theme.MaterialComponents.NoActionBar" />
 
         <activity android:name=".activity.SearchActivity" />
+        <activity android:name=".activity.AboutActivity" />
     </application>
 
 </manifest>
