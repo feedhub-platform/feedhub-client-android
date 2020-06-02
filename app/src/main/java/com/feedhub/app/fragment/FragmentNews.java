@@ -32,7 +32,8 @@ import com.feedhub.app.item.News;
 import com.feedhub.app.mvp.presenter.NewsPresenter;
 import com.feedhub.app.mvp.view.NewsView;
 import com.feedhub.app.util.AndroidUtils;
-import com.feedhub.app.widget.SearchBar;
+
+import org.jetbrains.annotations.Contract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +54,6 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
 
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
-
-    @BindView(R.id.searchView)
-    SearchBar searchBar;
 
     @Nullable
     private NewsAdapter adapter;
@@ -195,21 +193,11 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
         prepareRefreshLayout();
         prepareRecyclerView();
 
-        prepareSearchView();
-
         loadCachedValues();
 
         if (AndroidUtils.hasConnection()) {
             loadValues();
         }
-    }
-
-    private void prepareSearchView() {
-        searchBar.setOnQueryListener(lowerQuery -> {
-            if (adapter != null) {
-                adapter.filter(lowerQuery);
-            }
-        });
     }
 
     private void prepareToolbar() {
@@ -228,6 +216,8 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
         toolbar.setAvatarClickListener(getAvatarClickListener());
     }
 
+    @NonNull
+    @Contract(pure = true)
     private View.OnClickListener getAvatarClickListener() {
         return v -> ProfileBottomSheetDialog.show(getParentFragmentManager());
     }
