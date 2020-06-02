@@ -15,13 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.feedhub.app.R;
-import com.feedhub.app.adapter.FavoritesAdapter;
 import com.feedhub.app.adapter.NewsAdapter;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.dialog.ProfileBottomSheetDialog;
 import com.feedhub.app.item.Favorite;
+import com.feedhub.app.item.News;
 import com.feedhub.app.mvp.presenter.FavoritesPresenter;
 import com.feedhub.app.mvp.view.FavoritesView;
 
@@ -44,7 +44,7 @@ public class FragmentFavorites extends BaseFragment implements FavoritesView, Sw
     ProgressBar progressBar;
 
     @Nullable
-    private FavoritesAdapter adapter;
+    private NewsAdapter adapter;
 
     @NonNull
     private FavoritesPresenter presenter;
@@ -106,7 +106,7 @@ public class FragmentFavorites extends BaseFragment implements FavoritesView, Sw
     private void removeFavorite(View view, int position) {
         if (adapter == null) return;
 
-        Favorite favorite = adapter.getItem(position);
+        News favorite = (News) adapter.getItem(position);
 
         PopupMenu popupMenu = new PopupMenu(requireContext(), view);
         popupMenu.inflate(R.menu.fragment_favorites_more_popup);
@@ -214,7 +214,7 @@ public class FragmentFavorites extends BaseFragment implements FavoritesView, Sw
     @Override
     public void insertValues(@NonNull MvpFields fields, @NonNull ArrayList<Favorite> values) {
         if (adapter == null) {
-            adapter = new FavoritesAdapter(requireContext(), values);
+            adapter = new NewsAdapter(requireContext(), new ArrayList<>(values));
             adapter.setOnItemClickListener(this);
             adapter.setOnMoreClickListener(this::removeFavorite);
 
@@ -225,14 +225,14 @@ public class FragmentFavorites extends BaseFragment implements FavoritesView, Sw
         int offset = fields.getNonNull(MvpConstants.OFFSET);
 
         if (offset > 0) {
-            adapter.addAll(values);
+            adapter.addAll(new ArrayList<>(values));
             return;
         }
 
         if (values.isEmpty()) {
             adapter.clear();
         } else {
-            adapter.changeItems(values);
+            adapter.changeItems(new ArrayList<>(values));
         }
 
         adapter.notifyDataSetChanged();
@@ -252,6 +252,8 @@ public class FragmentFavorites extends BaseFragment implements FavoritesView, Sw
 
     @Override
     public void onItemClick(int position) {
+        if (adapter == null) return;
 
+        FragmentNews.openNewsPost(adapter, position, requireActivity());
     }
 }

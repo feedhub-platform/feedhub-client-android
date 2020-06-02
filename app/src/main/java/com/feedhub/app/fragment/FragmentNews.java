@@ -147,7 +147,9 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
                         case R.id.moreAddToFavorites:
                             TaskManager.execute(() -> {
                                 try {
-                                    Favorite favorite = new Favorite(news);
+//                                    Favorite favorite = new Favorite(news);
+
+                                    Favorite favorite = (Favorite) news;
 
                                     if (finalContains) {
                                         favoritesDao.delete(favorite);
