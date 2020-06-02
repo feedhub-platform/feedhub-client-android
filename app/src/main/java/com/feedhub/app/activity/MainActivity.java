@@ -57,7 +57,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         sendRequest();
     }
 
-    private void sendRequest() {
+    public void sendRequest() {
         TaskManager.execute(() -> {
             String link = "https://api.innomaxx.dev/feedhub/relay";
 

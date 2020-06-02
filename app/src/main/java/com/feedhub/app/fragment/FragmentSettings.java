@@ -12,13 +12,16 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.feedhub.app.R;
 import com.feedhub.app.activity.MainActivity;
+import com.feedhub.app.activity.SettingsActivity;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.net.RequestBuilder;
+import com.feedhub.app.util.LocaleUtils;
 import com.feedhub.app.util.StringUtils;
 import com.feedhub.app.util.Utils;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
@@ -128,6 +131,32 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
                         (String) newValue
                 );
 
+                String en = AppGlobal.preferences.getString(KEY_SERVER_URL_SUMMARY_EN, "");
+                String ru = AppGlobal.preferences.getString(KEY_SERVER_URL_SUMMARY_RU, "");
+                String uk = AppGlobal.preferences.getString(KEY_SERVER_URL_SUMMARY_UK, "");
+
+                Locale currentLocale = LocaleUtils.getCurrentLocale(requireContext());
+
+                String strLocale = currentLocale.toString();
+
+                String serverSummary = "";
+
+                switch (strLocale) {
+                    case "en":
+                        serverSummary = en;
+                        break;
+                    case "ru":
+                        serverSummary = ru;
+                        break;
+                    case "uk":
+                        serverSummary = uk;
+                        break;
+                }
+
+                AppGlobal.preferences.edit()
+                        .putString(KEY_SERVER_URL_SUMMARY, serverSummary)
+                        .apply();
+
                 AppGlobal.updateLocale(requireActivity().getBaseContext(), (String) newValue);
 //                LocaleHelper.setLocale(requireContext(), (String) newValue);
                 restartActivities();
@@ -153,9 +182,9 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
 
     @SuppressLint("PrivateResource")
     private void restartActivities() {
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(requireContext())
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(requireActivity().getApplicationContext())
                 .addNextIntent(new Intent(requireContext(), MainActivity.class))
-                .addNextIntent(requireActivity().getIntent());
+                .addNextIntent(new Intent(requireContext(), SettingsActivity.class));
 
         requireActivity().finishAffinity();
 
