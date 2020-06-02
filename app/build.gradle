@@ -46,4 +46,5 @@ dependencies {
 
     implementation 'com.facebook.fresco:fresco:0.6.1'
     implementation 'androidx.palette:palette:1.0.0'
+    implementation 'org.jetbrains:annotations:15.0'
 }

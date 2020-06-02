@@ -3,6 +3,7 @@ package com.feedhub.app.util;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class ArrayUtils {
@@ -28,10 +29,11 @@ public class ArrayUtils {
         return newList;
     }
 
+    @NonNull
     @SafeVarargs
     public static <T> String toString(T... array) {
         if (array == null || array.length == 0) {
-            return null;
+            return "";
         }
 
         StringBuilder builder = new StringBuilder(array.length * 12);
@@ -43,9 +45,10 @@ public class ArrayUtils {
         return builder.toString();
     }
 
-    public static String toString(List arrayList) {
+    @NonNull
+    public static <T> String toString(List<T> arrayList) {
         if (arrayList == null || arrayList.size() == 0) {
-            return null;
+            return "";
         }
 
         StringBuilder builder = new StringBuilder();
@@ -55,5 +58,10 @@ public class ArrayUtils {
             builder.append(arrayList.get(i));
         }
         return builder.toString();
+    }
+
+    @NonNull
+    public static <T> String toString(HashSet<T> hashSet) {
+        return toString(new ArrayList<>(hashSet));
     }
 }

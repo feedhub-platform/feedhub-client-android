@@ -16,6 +16,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Set;
 
 import ru.melod1n.library.mvp.base.MvpConstants;
 import ru.melod1n.library.mvp.base.MvpFields;
@@ -31,9 +32,14 @@ public class NewsRepository extends MvpRepository<News> {
         int offset = fields.getNonNull(MvpConstants.OFFSET);
         int count = fields.getNonNull(MvpConstants.COUNT);
 
+        Set<String> languages = AppGlobal.preferences.getStringSet(FragmentSettings.KEY_NEWS_LANGUAGE, null);
+
+        if (languages == null) return;
+
         RequestBuilder builder = RequestBuilder.create();
         builder.put("offset", offset);
         builder.put("limit", count);
+        builder.put("language", ArrayUtils.toString(new ArrayList<>(languages)));
         builder.method(prefs.getString(FragmentSettings.KEY_NEWS_KEY, ""));
         builder.execute(new RequestBuilder.OnResponseListener<JSONObject>() {
             @Override
