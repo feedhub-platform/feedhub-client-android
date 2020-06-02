@@ -19,7 +19,7 @@ public class RequestBuilder {
     public static String BASE_URL = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "");
 
     private String baseUrl;
-    private String methodName;
+    private String methodName = "";
 
     private ArrayMap<String, String> parameters = new ArrayMap<>();
 
@@ -99,7 +99,8 @@ public class RequestBuilder {
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append(NetUtils.transformUrl(baseUrl));
+        builder.append(baseUrl.contains("innomaxx") ? baseUrl : NetUtils.transformUrl(baseUrl));
+//        builder.append(baseUrl);
         builder.append(methodName);
 
         if (params.length() > 0) {

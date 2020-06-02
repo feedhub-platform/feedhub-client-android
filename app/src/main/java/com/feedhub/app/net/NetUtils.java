@@ -8,12 +8,12 @@ public class NetUtils {
 
     @NonNull
     public static String transformUrl(@NonNull String url) {
-        if (url.contains(PROTOCOL_HTML) || url.isEmpty()) return url;
+        if (url.isEmpty()) return url;
 
-        StringBuilder builder = new StringBuilder(PROTOCOL_HTML);
+        StringBuilder builder = new StringBuilder(url.contains(PROTOCOL_HTML) ? "" : PROTOCOL_HTML);
         builder.append(url);
 
-        String lastChar = url.substring(url.length() - 2);
+        String lastChar = url.substring(url.length() - 1);
 
         if (!lastChar.equals("/")) builder.append("/");
 

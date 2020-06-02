@@ -31,12 +31,33 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
     public static final String KEY_LANGUAGE = "language";
     public static final String KEY_NEWS_LANGUAGE = "news_language";
 
+    public static final String KEY_SERVER_URL_BLOCKED = "server_url_blocked";
+    public static final String KEY_SERVER_URL_SUMMARY = "server_summary";
+
+    public static final String KEY_SERVER_URL_SUMMARY_EN = "server_summary_en";
+    public static final String KEY_SERVER_URL_SUMMARY_RU = "server_summary_ru";
+    public static final String KEY_SERVER_URL_SUMMARY_UK = "server_summary_uk";
+
+    public static final String KEY_NEWS_KEY_DV = "news";
+    public static final String KEY_CATEGORY_KEY_DV = "platform/categories";
+    public static final String KEY_TOPICS_KEY_DV = "platform/topics";
+
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.fragment_settings, rootKey);
 
         Preference serverUrl = Objects.requireNonNull(findPreference(KEY_SERVER_URL));
-        setPreferenceValueSummary(KEY_SERVER_URL, (String) null);
+
+        boolean isLocked = AppGlobal.preferences.getBoolean(KEY_SERVER_URL_BLOCKED, true);
+        serverUrl.setEnabled(!isLocked);
+
+        if (isLocked) {
+            setPreferenceValueSummary(KEY_SERVER_URL,
+                    AppGlobal.preferences.getString(KEY_SERVER_URL_SUMMARY, "")
+            );
+        } else {
+            setPreferenceValueSummary(KEY_SERVER_URL, (String) null);
+        }
 
         Preference newsKey = Objects.requireNonNull(findPreference(KEY_NEWS_KEY));
         setPreferenceValueSummary(KEY_NEWS_KEY, (String) null);
