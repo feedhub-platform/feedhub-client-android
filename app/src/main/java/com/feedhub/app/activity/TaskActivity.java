@@ -29,9 +29,7 @@ public class TaskActivity extends AppCompatActivity {
 
             TaskManager.execute(() -> {
                 try {
-//                    Favorite favorite = new Favorite(news);
-
-                    Favorite favorite = (Favorite) news;
+                    Favorite favorite = new Favorite(news);
 
                     FavoritesDao dao = AppGlobal.database.favoritesDao();
 

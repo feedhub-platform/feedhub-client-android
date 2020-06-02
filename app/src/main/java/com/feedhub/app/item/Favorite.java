@@ -1,6 +1,7 @@
 package com.feedhub.app.item;
 
 import androidx.room.Entity;
+import androidx.room.Ignore;
 
 @Entity(tableName = "favorites")
 public class Favorite extends News {
@@ -19,14 +20,14 @@ public class Favorite extends News {
     public Favorite() {
     }
 
-//    @Ignore
-//    public Favorite(News news) {
-//        this.id = news.id;
-//        this.body = news.body;
-//        this.language = news.language;
-//        this.originTitle = news.originTitle;
-//        this.originUrl = news.originUrl;
-//        this.picture = news.picture;
-//        this.title = news.title;
-//    }
+    @Ignore
+    public Favorite(News news) {
+        this.id = news.id;
+        this.body = news.body;
+        this.language = news.language;
+        this.originTitle = news.originTitle;
+        this.originUrl = news.originUrl;
+        this.picture = news.picture;
+        this.title = news.title;
+    }
 }

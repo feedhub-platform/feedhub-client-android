@@ -147,9 +147,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
                         case R.id.moreAddToFavorites:
                             TaskManager.execute(() -> {
                                 try {
-//                                    Favorite favorite = new Favorite(news);
-
-                                    Favorite favorite = (Favorite) news;
+                                    Favorite favorite = new Favorite(news);
 
                                     if (finalContains) {
                                         favoritesDao.delete(favorite);
@@ -157,8 +155,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
 
                                         favoritesDao.insert(favorite);
                                     }
-
-
+                                    
                                     activity.runOnUiThread(() -> Toast.makeText(
                                             activity,
                                             finalContains ? R.string.removed_from_favorites : R.string.added_to_favorites,
