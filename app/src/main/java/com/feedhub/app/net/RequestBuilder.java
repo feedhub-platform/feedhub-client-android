@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.common.TaskManager;
+import com.feedhub.app.fragment.FragmentSettings;
 import com.feedhub.app.util.ArrayUtils;
 
 import org.json.JSONObject;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class RequestBuilder {
 
-    private static final String BASE_URL = "https://b18abda6.eu.ngrok.io/";
+    public static String BASE_URL = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "");
 
     private String baseUrl;
     private String methodName;
@@ -41,6 +42,10 @@ public class RequestBuilder {
         builder.baseUrl = BASE_URL;
 
         return builder;
+    }
+
+    public static void updateBaseUrl(String baseUrl) {
+        RequestBuilder.BASE_URL = baseUrl;
     }
 
     public RequestBuilder baseUrl(String baseUrl) {

@@ -21,13 +21,28 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <com.facebook.drawee.view.SimpleDraweeView
-                android:id="@+id/newsWidePicture"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="120dp"
-                app:actualImageScaleType="centerCrop"
-                app:fadeDuration="200"
-                tools:src="?colorAccent" />
+                android:layout_height="wrap_content">
+
+                <com.facebook.drawee.view.SimpleDraweeView
+                    android:id="@+id/newsWidePicture"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    app:actualImageScaleType="centerCrop"
+                    app:fadeDuration="200"
+                    tools:src="?colorAccent" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/newsMore"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="end|top"
+                    android:layout_margin="8dp"
+                    android:background="@drawable/more_vertical_bg"
+                    android:src="@drawable/ic_more_vertical" />
+
+            </FrameLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"

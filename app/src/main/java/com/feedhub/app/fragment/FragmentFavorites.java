@@ -1,40 +1,38 @@
 package com.feedhub.app.fragment;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.feedhub.app.R;
+import com.feedhub.app.adapter.FavoritesAdapter;
 import com.feedhub.app.adapter.NewsAdapter;
+import com.feedhub.app.common.AppGlobal;
+import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.dialog.ProfileBottomSheetDialog;
-import com.feedhub.app.item.News;
-import com.feedhub.app.mvp.presenter.NewsPresenter;
-import com.feedhub.app.mvp.view.NewsView;
-import com.feedhub.app.util.AndroidUtils;
+import com.feedhub.app.item.Favorite;
+import com.feedhub.app.mvp.presenter.FavoritesPresenter;
+import com.feedhub.app.mvp.view.FavoritesView;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import ru.melod1n.library.mvp.base.MvpConstants;
-import ru.melod1n.library.mvp.base.MvpException;
 import ru.melod1n.library.mvp.base.MvpFields;
 
-public class FragmentGeneral extends BaseFragment implements NewsView, SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener {
-
-    private static final int NEWS_COUNT = 10;
+public class FragmentFavorites extends BaseFragment implements FavoritesView, SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener {
 
     @BindView(R.id.refreshLayout)
     SwipeRefreshLayout refreshLayout;
@@ -42,36 +40,45 @@ public class FragmentGeneral extends BaseFragment implements NewsView, SwipeRefr
     @BindView(R.id.recyclerView)
     RecyclerView recyclerView;
 
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
+
     @Nullable
-    private NewsAdapter adapter;
+    private FavoritesAdapter adapter;
 
     @NonNull
-    private NewsPresenter presenter;
+    private FavoritesPresenter presenter;
 
-    public FragmentGeneral() {
-        presenter = new NewsPresenter(this);
+    public FragmentFavorites() {
+        presenter = new FavoritesPresenter(this);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_general, container, false);
+        return inflater.inflate(R.layout.fragment_favorites, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        setRecyclerView(recyclerView);
 
         prepareToolbar();
         prepareRefreshLayout();
         prepareRecyclerView();
 
-        loadCachedValues();
+        loadData();
+    }
 
-        if (AndroidUtils.hasConnection()) {
-            loadValues();
-        }
+    private void prepareRecyclerView() {
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false));
+    }
+
+    private void prepareRefreshLayout() {
+        refreshLayout.setColorSchemeResources(R.color.accent);
+        refreshLayout.setOnRefreshListener(this);
     }
 
     private void prepareToolbar() {
@@ -88,62 +95,55 @@ public class FragmentGeneral extends BaseFragment implements NewsView, SwipeRefr
         return v -> ProfileBottomSheetDialog.show(getParentFragmentManager());
     }
 
-    private void loadCachedValues() {
+    private void loadData() {
         presenter.requestCachedData(
                 new MvpFields()
                         .put(MvpConstants.OFFSET, 0)
-                        .put(MvpConstants.COUNT, NEWS_COUNT)
                         .put(MvpConstants.FROM_CACHE, true)
         );
     }
 
-    private void loadValues() {
-        if (AndroidUtils.hasConnection()) {
-            if (adapter != null && !adapter.isEmpty()) {
-                presenter.prepareForLoading();
-            } else {
-                startRefreshing();
-            }
-
-            presenter.requestLoadValues(
-                    new MvpFields()
-                            .put(MvpConstants.OFFSET, 0)
-                            .put(MvpConstants.COUNT, NEWS_COUNT)
-                            .put(MvpConstants.FROM_CACHE, false)
-            );
-        } else {
-            showNoInternetView();
-            stopRefreshing();
-        }
-    }
-
-    private void prepareRefreshLayout() {
-        refreshLayout.setColorSchemeResources(R.color.accent);
-        refreshLayout.setOnRefreshListener(this);
-    }
-
-    private void prepareRecyclerView() {
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireActivity(), RecyclerView.VERTICAL, false));
-    }
-
-    @Override
-    public void onRefresh() {
-        loadValues();
-    }
-
-    @Override
-    public void onItemClick(int position) {
+    private void removeFavorite(View view, int position) {
         if (adapter == null) return;
 
-        News news = adapter.getItem(position);
+        Favorite favorite = adapter.getItem(position);
 
-        CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
-                .addDefaultShareMenuItem()
-                .setToolbarColor(ContextCompat.getColor(requireContext(), R.color.primary))
-                .setShowTitle(true)
-                .build();
+        PopupMenu popupMenu = new PopupMenu(requireContext(), view);
+        popupMenu.inflate(R.menu.fragment_favorites_more_popup);
+        popupMenu.setOnMenuItemClickListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.moreDeleteFromFavorites:
+                    TaskManager.execute(() -> {
+                        try {
+                            AppGlobal.database.favoritesDao().deleteById(favorite.id);
+                            runOnUiThread(() -> {
+                                Toast.makeText(requireContext(), R.string.removed_from_favorites, Toast.LENGTH_SHORT).show();
 
-        customTabsIntent.launchUrl(requireContext(), Uri.parse(news.originUrl));
+                                if (adapter != null) {
+                                    adapter.remove(position);
+                                    adapter.notifyDataSetChanged();
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    return true;
+            }
+
+            return false;
+        });
+
+        popupMenu.show();
+
+
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        if (!hidden) {
+            loadData();
+        }
     }
 
     @Override
@@ -181,17 +181,9 @@ public class FragmentGeneral extends BaseFragment implements NewsView, SwipeRefr
 
     }
 
-
     @Override
-    public void showErrorView(@Nullable Exception e) {
-        if (e != null) {
-            if (e instanceof MvpException) {
-                if (((MvpException) e).errorId.equals(MvpException.ERROR_EMPTY)) return;
-            }
+    public void showErrorView(Exception e) {
 
-            if (getContext() != null)
-                Toast.makeText(requireContext(), getString(R.string.cause_exception, e.toString()), Toast.LENGTH_SHORT).show();
-        }
     }
 
     @Override
@@ -211,38 +203,38 @@ public class FragmentGeneral extends BaseFragment implements NewsView, SwipeRefr
 
     @Override
     public void showProgressBar() {
-
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hideProgressBar() {
-
+        progressBar.setVisibility(View.GONE);
     }
 
     @Override
-    public void insertValues(@NonNull MvpFields fields, @NonNull ArrayList<News> values) {
-        if (getContext() == null) return;
-
-        int offset = fields.getInt(MvpConstants.OFFSET);
-
+    public void insertValues(@NonNull MvpFields fields, @NonNull ArrayList<Favorite> values) {
         if (adapter == null) {
-            adapter = new NewsAdapter(requireContext(), values);
+            adapter = new FavoritesAdapter(requireContext(), values);
             adapter.setOnItemClickListener(this);
+            adapter.setOnMoreClickListener(this::removeFavorite);
 
             recyclerView.setAdapter(adapter);
             return;
         }
+
+        int offset = fields.getNonNull(MvpConstants.OFFSET);
 
         if (offset > 0) {
             adapter.addAll(values);
             return;
         }
 
-        if (recyclerView.getAdapter() == null) {
-            recyclerView.setAdapter(adapter);
+        if (values.isEmpty()) {
+            adapter.clear();
+        } else {
+            adapter.changeItems(values);
         }
 
-        adapter.changeItems(values);
         adapter.notifyDataSetChanged();
     }
 
@@ -250,7 +242,16 @@ public class FragmentGeneral extends BaseFragment implements NewsView, SwipeRefr
     public void clearList() {
         if (adapter != null) {
             adapter.clear();
-            adapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        loadData();
+    }
+
+    @Override
+    public void onItemClick(int position) {
+
     }
 }

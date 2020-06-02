@@ -10,8 +10,6 @@ import ru.melod1n.library.mvp.base.MvpPresenter;
 
 public class HeadlinesPresenter extends MvpPresenter<Headline, HeadlinesView, HeadlinesRepository> {
 
-    public static final String CATEGORY = "category";
-
     public HeadlinesPresenter(@NonNull HeadlinesView view) {
         super(view);
 

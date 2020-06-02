@@ -2,9 +2,11 @@ package com.feedhub.app.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +17,7 @@ import com.feedhub.app.adapter.HeadlinesPagerAdapter;
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.dialog.ProfileBottomSheetDialog;
 import com.feedhub.app.item.Headline;
+import com.feedhub.app.item.Topic;
 import com.feedhub.app.mvp.presenter.HeadlinesPresenter;
 import com.feedhub.app.mvp.view.HeadlinesView;
 import com.google.android.material.tabs.TabLayout;
@@ -27,6 +30,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import ru.melod1n.library.mvp.base.MvpConstants;
 import ru.melod1n.library.mvp.base.MvpFields;
+import ru.melod1n.library.mvp.base.MvpOnLoadListener;
 
 public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
 
@@ -36,38 +40,34 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     @BindView(R.id.headlinesTabs)
     TabLayout tabLayout;
 
-    private boolean needToDestroy;
+    @BindView(R.id.progressBar)
+    ProgressBar progressBar;
 
-//    private ArrayMap<String, String> categories = new ArrayMap<>();
-//    private ArrayMap<String, ArrayList<Topic>> topics = new ArrayMap<>();
+    String currentCategory;
+    int currentTopicId = -1;
 
     private List<String> titles = new ArrayList<>();
-
-    private boolean isPrepared;
-
     private HeadlinesPresenter presenter;
-
     private HeadlinesPagerAdapter adapter;
+    private String sourceId;
+    private String sourceTitle;
+
+    @NonNull
+    public static FragmentHeadlines newInstance(@NonNull Bundle arguments) {
+        FragmentHeadlines fragmentHeadlines = new FragmentHeadlines();
+        fragmentHeadlines.setArguments(arguments);
+        return fragmentHeadlines;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-    }
 
-    @Override
-    public void setArguments(@Nullable Bundle args) {
-        super.setArguments(args);
-
-        if (args == null) return;
-
-        String sourceId = args.getString("sourceId", "_empty");
-
-        if (sourceId.equals("_empty")) return;
-
-        needToDestroy = true;
-
-        loadCategories(null, sourceId);
+        if (getArguments() != null) {
+            sourceId = getArguments().getString("sourceId", "_empty");
+            sourceTitle = getArguments().getString("sourceTitle", "");
+        }
     }
 
     @Nullable
@@ -80,55 +80,54 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ButterKnife.bind(this, view);
+        setRecyclerView(null);
 
         prepareToolbar();
         prepareViewPager();
 
         presenter = new HeadlinesPresenter(this);
 
-        loadCategories(savedInstanceState, null);
+        loadCategories();
     }
 
     void loadCategories() {
-        loadCategories(null, null);
-    }
+        MvpFields fields = new MvpFields()
+                .put(MvpConstants.OFFSET, 0)
+                .put(MvpConstants.COUNT, 30)
+                .put(MvpConstants.FROM_CACHE, false);
 
-    private void loadCategories(Bundle savedInstanceState, @Nullable String sourceId) {
-        if (savedInstanceState == null && isAttached() || sourceId != null) {
-            MvpFields fields = new MvpFields()
-                    .put(MvpConstants.OFFSET, 0)
-                    .put(MvpConstants.COUNT, 30)
-                    .put(MvpConstants.FROM_CACHE, false);
-
-            if (sourceId != null) {
-                fields.put("sourceId", sourceId);
-            }
-
+        if (sourceId != null && !"_empty".equals(sourceId)) {
+            fields.put("sourceId", sourceId);
             presenter.requestLoadValues(fields);
         } else {
-            presenter.requestCachedData(new MvpFields()
-                    .put(MvpConstants.OFFSET, 0)
-                    .put(MvpConstants.COUNT, 30)
-                    .put(MvpConstants.FROM_CACHE, true));
-        }
-    }
+            presenter.repository.loadTopics(new MvpOnLoadListener<ArrayMap<String, ArrayList<Topic>>>() {
+                @Override
+                public void onSuccessLoad(ArrayList<ArrayMap<String, ArrayList<Topic>>> values) {
+                    fields.put("topics", values.get(0));
 
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
+                    presenter.requestLoadValues(fields);
+                }
 
-        if (needToDestroy && hidden) {
-            loadCategories(null, null);
+                @Override
+                public void onErrorLoad(Exception e) {
+                    e.printStackTrace();
+                }
+            });
         }
     }
 
     private void prepareToolbar() {
         initToolbar(R.id.toolbar);
 
-        toolbar.setTitle(R.string.app_name);
+        boolean useForSource = sourceId != null && !"_empty".equals(sourceId);
+
+        toolbar.setTitle(useForSource ? sourceTitle : getString(R.string.app_name));
         toolbar.setNavigationClickListener(v -> {
+            if (useForSource) {
+                requireActivity().onBackPressed();
+            }
         });
-        toolbar.setNavigationIcon(R.drawable.ic_search);
+        toolbar.setNavigationIcon(useForSource ? R.drawable.ic_arrow_back : R.drawable.ic_search);
         toolbar.setAvatarClickListener(getAvatarClickListener());
     }
 
@@ -137,7 +136,6 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
     }
 
     private void prepareViewPager() {
-        viewPager.setUserInputEnabled(false);
         viewPager.setSaveEnabled(false);
     }
 
@@ -156,85 +154,99 @@ public class FragmentHeadlines extends BaseFragment implements HeadlinesView {
         tabMediator.attach();
     }
 
-    private void onConfigureTab(TabLayout.Tab tab, int position) {
+    private void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
         tab.setText(titles.get(position));
     }
 
     @Override
     public void prepareNoInternetView() {
-
     }
 
     @Override
     public void prepareNoItemsView() {
-
     }
 
     @Override
     public void prepareErrorView() {
-
     }
 
     @Override
     public void showNoInternetView() {
-
     }
 
     @Override
     public void hideNoInternetView() {
-
     }
 
     @Override
     public void showNoItemsView() {
-
     }
 
     @Override
     public void hideNoItemsView() {
-
     }
 
     @Override
     public void showErrorView(Exception e) {
-
     }
 
     @Override
     public void hideErrorView() {
-
     }
 
     @Override
     public void startRefreshing() {
-
     }
 
     @Override
     public void stopRefreshing() {
-
     }
 
     @Override
     public void showProgressBar() {
-
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void hideProgressBar() {
-
+        progressBar.setVisibility(View.GONE);
     }
 
     @Override
     public void insertValues(@NonNull MvpFields fields, @NonNull ArrayList<Headline> values) {
-        adapter = new HeadlinesPagerAdapter(this, values);
+        if (!isAttached()) return;
+
+        ArrayMap<String, ArrayList<Topic>> data = new ArrayMap<>();
+
+        if (sourceTitle != null) {
+            for (Headline headline : values) {
+                data.put(headline.id, headline.topics);
+            }
+        }
+
+        adapter =
+                sourceId == null ?
+                        new HeadlinesPagerAdapter(this, values) :
+                        new HeadlinesPagerAdapter(this, values, sourceId, data);
+
         viewPager.setAdapter(adapter);
 
         prepareTabLayout();
+
+        if (currentCategory != null) {
+            for (int i = 0; i < tabLayout.getTabCount(); i++) {
+                TabLayout.Tab tab = tabLayout.getTabAt(i);
+
+                if (tab == null || tab.getText() == null) continue;
+
+                if (currentCategory.contentEquals(tab.getText())) {
+                    tabLayout.selectTab(tab);
+                }
+            }
+        }
     }
 
     @Override
     public void clearList() {
-
     }
 }

@@ -3,11 +3,15 @@
 
     <style name="AppTheme.Tab" parent="Widget.MaterialComponents.TabLayout.PrimarySurface">
         <item name="tabTextAppearance">@style/AppTheme.Tab.Text</item>
-        <item name="tabGravity">start</item>
+        <item name="tabGravity">center</item>
+        <item name="tabMode">scrollable</item>
+        <item name="tabMinWidth">100dp</item>
         <item name="tabIndicatorColor">?tabIndicatorColor</item>
         <item name="tabIndicatorFullWidth">false</item>
-        <item name="tabMode">scrollable</item>
+        <item name="tabRippleColor">?colorAccent</item>
+        <item name="tabTextColor">?tabTextColor</item>
         <item name="tabSelectedTextColor">?tabSelectedTextColor</item>
+
     </style>
 
     <style name="AppTheme.Tab.Text" parent="TextAppearance.MaterialComponents.Body2">
@@ -27,6 +31,10 @@
         <item name="chipIconTint">?colorAccent</item>
         <item name="chipStrokeColor">?colorAccent</item>
         <item name="android:textColor">?colorAccent</item>
+    </style>
+
+    <style name="AppTheme.BottomSheet" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+
     </style>
 
 </resources>

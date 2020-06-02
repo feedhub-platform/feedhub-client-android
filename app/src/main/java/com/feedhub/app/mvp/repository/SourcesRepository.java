@@ -16,7 +16,7 @@ import ru.melod1n.library.mvp.base.MvpFields;
 import ru.melod1n.library.mvp.base.MvpOnLoadListener;
 import ru.melod1n.library.mvp.base.MvpRepository;
 
-public class SourceRepository extends MvpRepository<Source> {
+public class SourcesRepository extends MvpRepository<Source> {
 
     @Override
     public void loadValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<Source> listener) {
@@ -25,17 +25,21 @@ public class SourceRepository extends MvpRepository<Source> {
                 .execute(new RequestBuilder.OnResponseListener<JSONObject>() {
                     @Override
                     public void onSuccess(JSONObject root) {
-                        JSONArray response = Objects.requireNonNull(root.optJSONArray("response"));
+                        try {
+                            JSONArray response = Objects.requireNonNull(root.optJSONArray("response"));
 
-                        ArrayList<Source> values = new ArrayList<>();
+                            ArrayList<Source> values = new ArrayList<>();
 
-                        for (int i = 0; i < response.length(); i++) {
-                            JSONObject jSource = response.optJSONObject(i);
+                            for (int i = 0; i < response.length(); i++) {
+                                JSONObject jSource = response.optJSONObject(i);
 
-                            values.add(new Source(jSource));
+                                values.add(new Source(jSource));
+                            }
+
+                            sendValues(fields, values, listener);
+                        } catch (Exception e) {
+                            sendError(listener, e);
                         }
-
-                        sendValuesToPresenter(fields, values, listener);
                     }
 
                     @Override

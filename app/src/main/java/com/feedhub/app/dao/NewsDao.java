@@ -1,6 +1,5 @@
 package com.feedhub.app.dao;
 
-import androidx.annotation.NonNull;
 import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
@@ -15,22 +14,25 @@ import java.util.List;
 @Dao
 public interface NewsDao {
 
-   @Query("SELECT * FROM news")
-   List<News> getAll();
- 
-   @Query("SELECT * FROM news WHERE id = :id")
-   News getById(String id);
+    @Query("SELECT * FROM news")
+    List<News> getAll();
 
-   @Insert(onConflict = OnConflictStrategy.REPLACE)
-   void insert(News news);
- 
-   @Update
-   void update(News news);
- 
-   @Delete
-   void delete(News news);
+    @Query("SELECT * FROM news WHERE id = :id")
+    News getById(String id);
 
-   @Query("DELETE FROM news")
-   void clear();
- 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insert(News news);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insert(List<News> news);
+
+    @Update
+    void update(News news);
+
+    @Delete
+    void delete(News news);
+
+    @Query("DELETE FROM news")
+    void clear();
+
 }

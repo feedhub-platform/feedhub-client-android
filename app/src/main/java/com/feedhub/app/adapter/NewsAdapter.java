@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -13,7 +14,9 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import com.feedhub.app.R;
 import com.feedhub.app.current.BaseAdapter;
 import com.feedhub.app.current.BaseHolder;
+import com.feedhub.app.item.BaseNewsItem;
 import com.feedhub.app.item.News;
+import com.feedhub.app.item.Search;
 import com.feedhub.app.util.StringUtils;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
@@ -24,22 +27,71 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
+public class NewsAdapter extends BaseAdapter<BaseNewsItem, BaseHolder> {
 
-    public NewsAdapter(@NonNull Context context, @NonNull ArrayList<News> values) {
+    private static final int TYPE_SEARCH = 2001;
+
+    private OnMoreClickListener onMoreClickListener;
+
+    public NewsAdapter(@NonNull Context context, @NonNull ArrayList<BaseNewsItem> values) {
         super(context, values);
+    }
+
+    public void setOnMoreClickListener(OnMoreClickListener onMoreClickListener) {
+        this.onMoreClickListener = onMoreClickListener;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (getItem(position) == null) return TYPE_LOADING;
+        if (getItem(position) instanceof Search) return TYPE_SEARCH;
+
+        return super.getItemViewType(position);
     }
 
     @NonNull
     @Override
-    public ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public BaseHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == TYPE_LOADING) return new LoadingHolder(view(R.layout.item_loading, parent));
+
+        if (viewType == TYPE_SEARCH) return new ItemSearch(view(R.layout.item_search, parent));
+
         return new ItemHolder(view(R.layout.item_news, parent));
+    }
+
+    @Override
+    public boolean onQueryItem(@NonNull BaseNewsItem item, @NonNull String lowerQuery) {
+        return item.title.toLowerCase().contains(lowerQuery) ||
+                item.body.toLowerCase().contains(lowerQuery);
+    }
+
+    public interface OnMoreClickListener {
+        void onClick(View view, int position);
+    }
+
+    class ItemSearch extends BaseHolder {
+
+        @BindView(R.id.searchQuery)
+        TextView query;
+
+        ItemSearch(@NonNull View v) {
+            super(v);
+
+            ButterKnife.bind(this, v);
+        }
+
+        @Override
+        public void bind(int position) {
+            Search item = (Search) getItem(position);
+
+            query.setText(item.query);
+        }
     }
 
     class ItemHolder extends BaseHolder {
 
-        private final int MAX_TITLE_LENGTH = 100;
-        private final int MAX_BODY_LENGTH = 400;
+        private static final int MAX_TITLE_LENGTH = 100;
+        private static final int MAX_BODY_LENGTH = 400;
 
         @BindView(R.id.newsRoot)
         View root;
@@ -65,6 +117,9 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         @BindView(R.id.newsOriginTitle)
         Chip originTitle;
 
+        @BindView(R.id.newsMore)
+        ImageButton more;
+
         ItemHolder(@NonNull View v) {
             super(v);
 
@@ -75,7 +130,7 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
         public void bind(int position) {
             currentPosition = position;
 
-            News item = getItem(position);
+            News item = (News) getItem(position);
 
             language.setText(item.language.toUpperCase());
 
@@ -93,38 +148,14 @@ public class NewsAdapter extends BaseAdapter<News, NewsAdapter.ItemHolder> {
 
             if (TextUtils.isEmpty(sPicture)) {
                 widePicture.setVisibility(View.GONE);
-//                widePicture.setImageDrawable(null);
-
                 picture.setVisibility(View.GONE);
-//                picture.setImageDrawable(null);
             } else {
                 widePicture.setImageURI(Uri.parse(sPicture));
-//                new Thread(() -> {
-//                    try {
-//                        Bitmap bitmap = Picasso.get().load(sPicture).get();
-//
-////                        float h = bitmap.getHeight();
-////                        float w = bitmap.getWidth();
-//
-//                        AppGlobal.handler.post(() -> {
-//                            widePicture.setImageBitmap(bitmap);
-////                            if (w / h > 1.5) {
-////                                picture.setVisibility(View.GONE);
-////                                widePicture.setVisibility(View.VISIBLE);
-////
-////                                widePicture.setImageBitmap(bitmap);
-////                            } else {
-////                                picture.setVisibility(View.VISIBLE);
-////                                widePicture.setVisibility(View.GONE);
-////
-////                                picture.setImageBitmap(bitmap);
-////                            }
-//                        });
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }).start();
             }
+
+            more.setOnClickListener(v -> {
+                if (onMoreClickListener != null) onMoreClickListener.onClick(v, position);
+            });
         }
     }
 }

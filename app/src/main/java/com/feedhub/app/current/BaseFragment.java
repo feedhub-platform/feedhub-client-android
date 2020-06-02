@@ -4,15 +4,18 @@ import android.content.Context;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.feedhub.app.widget.Toolbar;
 
 public abstract class BaseFragment extends Fragment {
 
+    protected Toolbar toolbar;
     private boolean isAttached;
 
-    protected Toolbar toolbar;
+    private RecyclerView recyclerView;
 
     protected void initToolbar(@IdRes int resId) {
         toolbar = requireView().findViewById(resId);
@@ -36,5 +39,18 @@ public abstract class BaseFragment extends Fragment {
 
     public boolean isAttached() {
         return isAttached;
+    }
+
+    protected void runOnUiThread(Runnable runnable) {
+        requireActivity().runOnUiThread(runnable);
+    }
+
+    @Nullable
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
+    }
+
+    public void setRecyclerView(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
     }
 }

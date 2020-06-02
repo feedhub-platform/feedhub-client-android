@@ -14,7 +14,7 @@ public abstract class MvpPresenter<T, V extends MvpView<T>, R extends MvpReposit
     protected V view;
 
     @NonNull
-    protected R repository;
+    public R repository;
 
     @NonNull
     protected ArrayList<T> loadedValues = new ArrayList<>();

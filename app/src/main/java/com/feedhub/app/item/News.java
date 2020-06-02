@@ -5,31 +5,20 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
-public class News {
+public class News extends BaseNewsItem {
 
     @NonNull
     @PrimaryKey
     public String id = "";
 
-    public String title;
-    public String body;
-    public String picture;
-    public String language;
-    public String originTitle;
-    public String originUrl;
-
-    public News() {
-    }
-
-    @Ignore
-    public News(String title, String body, String picture) {
-        this.title = title;
-        this.body = body;
-        this.picture = picture;
-    }
+    public News() {}
 
     @Ignore
     public News(JSONObject o) {
@@ -45,4 +34,16 @@ public class News {
             originUrl = origin.optString("url");
         }
     }
+
+    @NonNull
+    public static List<News> parse(@NonNull JSONArray jsonArray) {
+        List<News> list = new ArrayList<>();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            list.add(new News(jsonArray.optJSONObject(i)));
+        }
+
+        return list;
+    }
+
 }

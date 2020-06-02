@@ -10,8 +10,10 @@
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">true</item>
         <item name="android:navigationBarColor" tools:targetApi="o_mr1">?colorPrimary</item>
+        <item name="tabTextColor">?android:textColorSecondary</item>
         <item name="tabIndicatorColor">?colorAccent</item>
-        <item name="tabSelectedTextColor">?tabIndicatorColor</item>
+        <item name="tabSelectedTextColor">?colorAccent</item>
+        <item name="bottomSheetDialogTheme">@style/AppTheme.BottomSheet</item>
     </style>
 
 </resources>

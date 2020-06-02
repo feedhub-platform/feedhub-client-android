@@ -1,33 +1,37 @@
 package com.feedhub.app.current;
 
-import android.content.Intent;
-import android.view.View;
+import android.os.Bundle;
 
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.feedhub.app.R;
-import com.feedhub.app.activity.SettingsActivity;
-
-import butterknife.ButterKnife;
+import com.feedhub.app.common.AppGlobal;
+import com.feedhub.app.fragment.FragmentSettings;
+import com.feedhub.app.util.Utils;
 
 public abstract class BaseActivity extends AppCompatActivity {
 
-    protected boolean useButterKnife = false;
-
     public BaseActivity() {
-    }
-
-    public BaseActivity(boolean useButterKnife) {
-        this.useButterKnife = useButterKnife;
+//        updateLocale();
     }
 
     @Override
-    public void setContentView(int layoutResID) {
-        super.setContentView(layoutResID);
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        updateLocale();
+        super.onCreate(savedInstanceState);
+    }
 
-        if (useButterKnife) {
-            ButterKnife.bind(this);
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        updateLocale();
     }
+
+    protected void updateLocale() {
+        String strLocale = AppGlobal.preferences.getString(FragmentSettings.KEY_LANGUAGE, Utils.LOCALE_EN);
+
+        Utils.changeLocale(getBaseContext(), strLocale);
+        AppGlobal.updateLocale(getBaseContext(), strLocale);
     }
+}

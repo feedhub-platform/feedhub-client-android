@@ -1,43 +1,51 @@
 package com.feedhub.app.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.feedhub.app.R;
-import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.current.BaseAdapter;
 import com.feedhub.app.current.BaseHolder;
-import com.feedhub.app.item.News;
-import com.feedhub.app.util.AndroidUtils;
+import com.feedhub.app.item.Favorite;
 import com.feedhub.app.util.StringUtils;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
 import com.makeramen.roundedimageview.RoundedImageView;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class HeadlineAdapter extends BaseAdapter<News, HeadlineAdapter.ItemHolder> {
+public class FavoritesAdapter extends BaseAdapter<Favorite, FavoritesAdapter.ItemHolder> {
 
-    public HeadlineAdapter(@NonNull Context context, @NonNull ArrayList<News> values) {
+    private OnMoreClickListener onMoreClickListener;
+
+    public FavoritesAdapter(@NonNull Context context, @NonNull ArrayList<Favorite> values) {
         super(context, values);
+    }
+
+    public void setOnMoreClickListener(OnMoreClickListener onMoreClickListener) {
+        this.onMoreClickListener = onMoreClickListener;
     }
 
     @NonNull
     @Override
     public ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new ItemHolder(view(R.layout.item_headline_item, parent));
+        return new ItemHolder(view(R.layout.item_news, parent));
     }
 
+    public interface OnMoreClickListener {
+        void onClick(View view, int position);
+    }
 
     class ItemHolder extends BaseHolder {
 
@@ -60,7 +68,16 @@ public class HeadlineAdapter extends BaseAdapter<News, HeadlineAdapter.ItemHolde
         RoundedImageView picture;
 
         @BindView(R.id.newsWidePicture)
-        RoundedImageView widePicture;
+        SimpleDraweeView widePicture;
+
+        @BindView(R.id.newsLanguage)
+        Chip language;
+
+        @BindView(R.id.newsOriginTitle)
+        Chip originTitle;
+
+        @BindView(R.id.newsMore)
+        ImageButton more;
 
         ItemHolder(@NonNull View v) {
             super(v);
@@ -72,7 +89,11 @@ public class HeadlineAdapter extends BaseAdapter<News, HeadlineAdapter.ItemHolde
         public void bind(int position) {
             currentPosition = position;
 
-            News item = getItem(position);
+            Favorite item = getItem(position);
+
+            language.setText(item.language.toUpperCase());
+
+            originTitle.setText(item.originTitle);
 
             String sTitle = StringUtils.cutString(item.title, MAX_TITLE_LENGTH, true);
             title.setText(sTitle);
@@ -86,37 +107,15 @@ public class HeadlineAdapter extends BaseAdapter<News, HeadlineAdapter.ItemHolde
 
             if (TextUtils.isEmpty(sPicture)) {
                 widePicture.setVisibility(View.GONE);
-                widePicture.setImageDrawable(null);
 
                 picture.setVisibility(View.GONE);
-                picture.setImageDrawable(null);
             } else {
-                new Thread(() -> {
-                    try {
-                        Bitmap bitmap = Picasso.get().load(sPicture).get();
-
-//                        float h = bitmap.getHeight();
-//                        float w = bitmap.getWidth();
-
-                        AppGlobal.handler.post(() -> {
-                            widePicture.setImageBitmap(bitmap);
-//                            if (w / h > 1.5) {
-//                                picture.setVisibility(View.GONE);
-//                                widePicture.setVisibility(View.VISIBLE);
-//
-//                                widePicture.setImageBitmap(bitmap);
-//                            } else {
-//                                picture.setVisibility(View.VISIBLE);
-//                                widePicture.setVisibility(View.GONE);
-//
-//                                picture.setImageBitmap(bitmap);
-//                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }).start();
+                widePicture.setImageURI(Uri.parse(sPicture));
             }
+
+            more.setOnClickListener(v -> {
+                if (onMoreClickListener != null) onMoreClickListener.onClick(v, position);
+            });
         }
     }
 }

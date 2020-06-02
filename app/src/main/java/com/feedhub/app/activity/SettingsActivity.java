@@ -2,8 +2,8 @@ package com.feedhub.app.activity;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.feedhub.app.R;
 import com.feedhub.app.current.BaseActivity;
@@ -31,5 +31,10 @@ public class SettingsActivity extends BaseActivity {
         toolbar.setNavigationOnBackClickListener(this);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainer, new FragmentSettings(), FragmentSettings.class.getSimpleName()).commit();
+    }
+
+    @NonNull
+    public Toolbar getToolbar() {
+        return toolbar;
     }
 }

@@ -16,13 +16,14 @@
         android:title="@string/navigation_sources" />
 
     <item
-        android:id="@+id/navigationFollowing"
-        android:icon="@drawable/ic_star_outline"
-        android:title="@string/navigation_following" />
+        android:id="@+id/navigationSubscriptions"
+        android:icon="@drawable/ic_subscriptions"
+        android:title="@string/navigation_subscriptions"
+        android:visible="false" />
 
     <item
-        android:id="@+id/navigationSaved"
-        android:icon="@drawable/ic_notebook_outline"
-        android:title="@string/navigation_saved" />
+        android:id="@+id/navigationFavorites"
+        android:icon="@drawable/ic_star_outline"
+        android:title="@string/navigation_favorites" />
 
 </menu>

@@ -6,7 +6,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,8 +15,10 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 import com.feedhub.app.R;
+import com.feedhub.app.common.AppGlobal;
 import com.google.android.material.appbar.MaterialToolbar;
 
 public class Toolbar extends MaterialToolbar {
@@ -34,17 +36,17 @@ public class Toolbar extends MaterialToolbar {
     }
 
     @Override
-    public void setTitle(int resId) {
-        setTitle(getContext().getString(resId));
+    public void setTitle(@StringRes int resId) {
+        setTitle(AppGlobal.resources.getString(resId));
     }
 
     @Override
-    public void setTitle(CharSequence title) {
+    public void setTitle(@Nullable CharSequence title) {
         ((TextView) findViewById(R.id.toolbarTitle)).setText(title);
     }
 
     @Override
-    public void setTitleTextColor(int color) {
+    public void setTitleTextColor(@ColorInt int color) {
         ((TextView) findViewById(R.id.toolbarTitle)).setTextColor(color);
     }
 
@@ -63,7 +65,7 @@ public class Toolbar extends MaterialToolbar {
         ((ImageButton) findViewById(R.id.toolbarNavigationIcon)).setImageResource(resId);
     }
 
-    public void setNavigationIconTintList(ColorStateList tintList) {
+    public void setNavigationIconTintList(@NonNull ColorStateList tintList) {
         Drawable icon = ((ImageButton) findViewById(R.id.toolbarNavigationIcon)).getDrawable();
 
         if (icon != null) {
@@ -79,7 +81,7 @@ public class Toolbar extends MaterialToolbar {
         }
     }
 
-    public void setNavigationClickListener(OnClickListener listener) {
+    public void setNavigationClickListener(@Nullable OnClickListener listener) {
         findViewById(R.id.toolbarNavigation).setOnClickListener(listener);
     }
 
@@ -92,10 +94,10 @@ public class Toolbar extends MaterialToolbar {
     }
 
     public void setAvatarIcon(@Nullable Drawable icon) {
-        ((ImageView) findViewById(R.id.toolbarAvatar)).setImageDrawable(icon);
+        ((ImageView) ((FrameLayout) findViewById(R.id.toolbarAvatar)).getChildAt(0)).setImageDrawable(icon);
     }
 
-    public void setAvatarClickListener(OnClickListener listener) {
+    public void setAvatarClickListener(@Nullable OnClickListener listener) {
         findViewById(R.id.toolbarAvatar).setOnClickListener(listener);
     }
 

@@ -4,24 +4,34 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.feedhub.app.R;
+
 import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public abstract class BaseAdapter<T, VH extends BaseHolder>
         extends RecyclerView.Adapter<VH> {
 
+    public static final int TYPE_NORMAL = 0;
+    public static final int TYPE_LOADING = 1;
+
+    public boolean isLoading;
+
     public OnItemClickListener onItemClickListener;
     public OnItemLongClickListener onItemLongClickListener;
-
+    public int currentPosition = -1;
     protected Context context;
     protected ArrayList<T> values;
+    protected ArrayList<T> cleanValues;
     protected LayoutInflater inflater;
-
-    public int currentPosition = -1;
 
     public BaseAdapter(@NonNull Context context, @NonNull ArrayList<T> values) {
         this.context = context;
@@ -59,6 +69,10 @@ public abstract class BaseAdapter<T, VH extends BaseHolder>
     @Override
     public int getItemCount() {
         return values.size();
+    }
+
+    public ArrayList<T> getValues() {
+        return values;
     }
 
     public void changeItems(ArrayList<T> values) {
@@ -117,12 +131,54 @@ public abstract class BaseAdapter<T, VH extends BaseHolder>
         this.onItemLongClickListener = onItemLongClickListener;
     }
 
+    public void filter(String query) {
+        String lowerQuery = query.toLowerCase();
+
+        if (cleanValues == null) {
+            cleanValues = new ArrayList<>(values);
+        }
+
+        values.clear();
+
+        if (query.isEmpty()) {
+            values.addAll(cleanValues);
+        } else {
+            for (T value : cleanValues) {
+                if (onQueryItem(value, lowerQuery)) {
+                    values.add(value);
+                }
+            }
+        }
+
+        notifyDataSetChanged();
+    }
+
+    public boolean onQueryItem(@NonNull T item, @NonNull String lowerQuery) {
+        return false;
+    }
+
     public interface OnItemClickListener {
         void onItemClick(int position);
     }
 
     public interface OnItemLongClickListener {
         void onItemLongClick(int position);
+    }
+
+    protected class LoadingHolder extends BaseHolder {
+
+        @BindView(R.id.progressBar)
+        ProgressBar progressBar;
+
+        public LoadingHolder(@NonNull View v) {
+            super(v);
+
+            ButterKnife.bind(this, v);
+        }
+
+        @Override
+        public void bind(int position) {
+        }
     }
 
 }

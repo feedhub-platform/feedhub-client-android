@@ -15,76 +15,57 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import ru.melod1n.library.mvp.base.MvpConstants;
-import ru.melod1n.library.mvp.base.MvpException;
 import ru.melod1n.library.mvp.base.MvpFields;
 import ru.melod1n.library.mvp.base.MvpOnLoadListener;
 import ru.melod1n.library.mvp.base.MvpRepository;
 
 public class NewsRepository extends MvpRepository<News> {
 
-    private NewsDao newsDao = AppGlobal.database.newsDao();
+    private NewsDao dao = AppGlobal.database.newsDao();
 
     @Override
     public void loadValues(@NonNull MvpFields fields, @Nullable MvpOnLoadListener<News> listener) {
-        RequestBuilder.create()
-//                .baseUrl(prefs.getString(FragmentSettings.KEY_SERVER_URL, ""))
-                .method(prefs.getString(FragmentSettings.KEY_NEWS_KEY, ""))
-                .execute(new RequestBuilder.OnResponseListener<JSONObject>() {
-                    @Override
-                    public void onSuccess(JSONObject root) {
-                        try {
-                            JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-                            JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
+        int offset = fields.getNonNull(MvpConstants.OFFSET);
+        int count = fields.getNonNull(MvpConstants.COUNT);
 
-                            final ArrayList<News> news = new ArrayList<>();
+        Set<String> languages = AppGlobal.preferences.getStringSet(FragmentSettings.KEY_NEWS_LANGUAGE, null);
 
-                            for (int i = 0; i < items.length(); i++) {
-                                news.add(new News(items.optJSONObject(i)));
-                            }
+        if (languages == null) return;
 
-                            cacheLoadedValues(news);
-                            sendValuesToPresenter(fields, news, listener);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+        RequestBuilder builder = RequestBuilder.create();
+        builder.put("offset", offset);
+        builder.put("limit", count);
+        builder.put("language", ArrayUtils.toString(new ArrayList<>(languages)));
+        builder.method(prefs.getString(FragmentSettings.KEY_NEWS_KEY, ""));
+        builder.execute(new RequestBuilder.OnResponseListener<JSONObject>() {
+            @Override
+            public void onSuccess(JSONObject root) {
+                try {
+                    JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+                    JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
 
-                            sendError(listener, e);
-                        }
+                    final ArrayList<News> news = new ArrayList<>();
+
+                    for (int i = 0; i < items.length(); i++) {
+                        news.add(new News(items.optJSONObject(i)));
                     }
 
-                    @Override
-                    public void onError(Exception e) {
-                        sendError(listener, e);
-                    }
-                });
+                    cacheLoadedValues(news);
+                    sendValues(fields, news, listener);
+                } catch (Exception e) {
+                    sendError(listener, e);
+                }
+            }
 
-//        String serverUrl =
-//                AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
-//                        AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, "");
-//
-//        TaskManager.execute(() -> {
-//            try {
-//                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
-//                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-//                JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
-//
-//                final ArrayList<News> news = new ArrayList<>();
-//
-//                for (int i = 0; i < items.length(); i++) {
-//                    news.add(new News(items.optJSONObject(i)));
-//                }
-//
-//                cacheLoadedValues(news);
-//                sendValuesToPresenter(fields, news, listener);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//
-//                sendError(listener, e);
-//            }
-//        });
+            @Override
+            public void onError(Exception e) {
+                sendError(listener, e);
+            }
+        });
     }
 
     @Override
@@ -94,16 +75,10 @@ public class NewsRepository extends MvpRepository<News> {
 
         startNewThread(() -> {
             try {
-                ArrayList<News> cachedValues = new ArrayList<>(newsDao.getAll());
+                ArrayList<News> cachedValues = new ArrayList<>(dao.getAll());
                 ArrayUtils.prepareList(cachedValues, offset, count);
 
-                post(() -> {
-                    if (cachedValues.isEmpty()) {
-                        sendError(listener, MvpException.ERROR_EMPTY);
-                    } else {
-                        sendValuesToPresenter(fields, cachedValues, listener);
-                    }
-                });
+                post(() -> sendValues(fields, cachedValues, listener));
             } catch (Exception e) {
                 post(() -> sendError(listener, e));
             }
@@ -112,18 +87,6 @@ public class NewsRepository extends MvpRepository<News> {
 
     @Override
     protected void cacheLoadedValues(@NonNull ArrayList<News> values) {
-        startNewThread(() -> {
-            List<News> cachedValues = newsDao.getAll();
-
-            if (cachedValues.isEmpty()) {
-                for (News news : values) {
-                    newsDao.insert(news);
-                }
-            } else {
-                for (News news : values) {
-                    newsDao.insert(news);
-                }
-            }
-        });
+        startNewThread(() -> dao.insert(values));
     }
 }

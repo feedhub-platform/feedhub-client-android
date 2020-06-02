@@ -1,5 +1,6 @@
 package com.feedhub.app.activity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -9,43 +10,43 @@ import androidx.fragment.app.Fragment;
 
 import com.feedhub.app.R;
 import com.feedhub.app.current.BaseActivity;
-import com.feedhub.app.fragment.FragmentFollowing;
-import com.feedhub.app.fragment.FragmentGeneral;
+import com.feedhub.app.current.BaseFragment;
+import com.feedhub.app.fragment.FragmentFavorites;
 import com.feedhub.app.fragment.FragmentHeadlines;
-import com.feedhub.app.fragment.FragmentSaved;
+import com.feedhub.app.fragment.FragmentNews;
 import com.feedhub.app.fragment.FragmentSources;
+import com.feedhub.app.fragment.FragmentSubscriptions;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Arrays;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import ru.melod1n.library.fragment.FragmentSwitcher;
 
 public class MainActivity extends BaseActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
 
     public final FragmentHeadlines fragmentHeadlines = new FragmentHeadlines();
-    private final FragmentGeneral fragmentGeneral = new FragmentGeneral();
-    private final FragmentFollowing fragmentFollowing = new FragmentFollowing();
-    private final FragmentSaved fragmentSaved = new FragmentSaved();
+    private final FragmentNews fragmentNews = new FragmentNews();
+    private final FragmentSubscriptions fragmentSubscriptions = new FragmentSubscriptions();
+    private final FragmentFavorites fragmentFavorites = new FragmentFavorites();
     private final FragmentSources fragmentSources = new FragmentSources();
 
     @BindView(R.id.bottomNavigationView)
     BottomNavigationView navigationView;
 
-    public MainActivity() {
-        super(true);
-    }
-
+    @SuppressLint("PrivateResource")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         prepareBottomNavView();
 
         prepareFragments();
 
-        replaceFragment(fragmentGeneral);
+        replaceFragment(fragmentNews);
     }
 
     private void prepareFragments() {
@@ -60,10 +61,10 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         FragmentSwitcher.addFragments(
                 getSupportFragmentManager(),
                 containerId,
-                Arrays.asList(fragmentGeneral, fragmentHeadlines, fragmentFollowing, fragmentSaved, fragmentSources)
+                Arrays.asList(fragmentNews, fragmentHeadlines, fragmentSubscriptions, fragmentFavorites, fragmentSources)
         );
 
-        FragmentSwitcher.showFragment(getSupportFragmentManager(), fragmentGeneral.getClass().getSimpleName(), null, true);
+        FragmentSwitcher.showFragment(getSupportFragmentManager(), fragmentNews.getClass().getSimpleName(), null, true);
 
 //        getSupportFragmentManager()
 //                .beginTransaction()
@@ -74,7 +75,7 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 //                .commit();
 
 
-        container.animate().alpha(1).setDuration(1250).withEndAction(() -> {
+        container.animate().alpha(1).setDuration(500).withEndAction(() -> {
             container.setClickable(true);
             container.setFocusable(true);
         }).start();
@@ -85,16 +86,16 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.navigationGeneral:
-                replaceFragment(fragmentGeneral);
+                replaceFragment(fragmentNews);
                 return true;
             case R.id.navigationHeadlines:
                 replaceFragment(fragmentHeadlines);
                 return true;
-            case R.id.navigationFollowing:
-                replaceFragment(fragmentFollowing);
+            case R.id.navigationSubscriptions:
+                replaceFragment(fragmentSubscriptions);
                 return true;
-            case R.id.navigationSaved:
-                replaceFragment(fragmentSaved);
+            case R.id.navigationFavorites:
+                replaceFragment(fragmentFavorites);
                 return true;
             case R.id.navigationSources:
                 replaceFragment(fragmentSources);
@@ -109,7 +110,29 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
     }
 
     private void onReselect(@NonNull MenuItem item) {
-        //empty
+        BaseFragment fragment = null;
+
+        switch (item.getItemId()) {
+            case R.id.navigationGeneral:
+                fragment = fragmentNews;
+                break;
+            case R.id.navigationHeadlines:
+                fragment = fragmentHeadlines;
+                break;
+            case R.id.navigationSubscriptions:
+                fragment = fragmentSubscriptions;
+                break;
+            case R.id.navigationFavorites:
+                fragment = fragmentFavorites;
+                break;
+            case R.id.navigationSources:
+                fragment = fragmentSources;
+                break;
+        }
+
+        if (fragment != null && fragment.getRecyclerView() != null) {
+            fragment.getRecyclerView().smoothScrollToPosition(0);
+        }
     }
 
     private void replaceFragment(Fragment fragment) {

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">"FeedHub"</string>
+    <string name="navigation_general">"Головне"</string>
+    <string name="navigation_favorites">"Збережене"</string>
+    <string name="navigation_headlines">"Категорії"</string>
+    <string name="navigation_subscriptions">"Підписки"</string>
+    <string name="navigation_settings">"Налаштування"</string>
+    <string name="preference_server_url_title">"Адреса серверу"</string>
+    <string name="cause_exception">"Сталася помилка: %s"</string>
+    <string name="preference_news_key_title">"Ключ новин"</string>
+    <string name="preference_category_key_title">"Ключ категорій"</string>
+    <string name="preference_topics_key_title">"Ключ підтем"</string>
+    <string name="navigation_sources">"Джерела"</string>
+    <string name="add_to_favorites">"Додати до збереженого"</string>
+    <string name="added_to_favorites">"Додано до збереженого"</string>
+    <string name="remove_from_favorites">"Видалити зі збереженого"</string>
+    <string name="removed_from_favorites">"Видалено зі збереженого"</string>
+    <string name="open_post_confirmation">"Відкрити статтю?"</string>
+    <string name="dialog_yes">"Так"</string>
+    <string name="dialog_no">"Ні"</string>
+    <string name="english">"Англійська"</string>
+    <string name="russian">"Російська"</string>
+    <string name="ukrainian">"Українська"</string>
+    <string name="preference_language_title">"Мова додатку"</string>
+    <string name="preference_news_language_title">"Мова новин"</string>
+    <string name="chrome_tabs_add_to_favorites">в Обрані</string>
+</resources>
