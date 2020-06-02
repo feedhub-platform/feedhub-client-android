@@ -12,13 +12,16 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import com.feedhub.app.R;
 import com.feedhub.app.activity.MainActivity;
+import com.feedhub.app.activity.SettingsActivity;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.net.RequestBuilder;
+import com.feedhub.app.util.LocaleUtils;
 import com.feedhub.app.util.StringUtils;
 import com.feedhub.app.util.Utils;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
@@ -31,12 +34,33 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
     public static final String KEY_LANGUAGE = "language";
     public static final String KEY_NEWS_LANGUAGE = "news_language";
 
+    public static final String KEY_SERVER_URL_BLOCKED = "server_url_blocked";
+    public static final String KEY_SERVER_URL_SUMMARY = "server_summary";
+
+    public static final String KEY_SERVER_URL_SUMMARY_EN = "server_summary_en";
+    public static final String KEY_SERVER_URL_SUMMARY_RU = "server_summary_ru";
+    public static final String KEY_SERVER_URL_SUMMARY_UK = "server_summary_uk";
+
+    public static final String KEY_NEWS_KEY_DV = "news";
+    public static final String KEY_CATEGORY_KEY_DV = "platform/categories";
+    public static final String KEY_TOPICS_KEY_DV = "platform/topics";
+
     @Override
     public void onCreatePreferences(@Nullable Bundle savedInstanceState, @Nullable String rootKey) {
         setPreferencesFromResource(R.xml.fragment_settings, rootKey);
 
         Preference serverUrl = Objects.requireNonNull(findPreference(KEY_SERVER_URL));
-        setPreferenceValueSummary(KEY_SERVER_URL, (String) null);
+
+        boolean isLocked = AppGlobal.preferences.getBoolean(KEY_SERVER_URL_BLOCKED, true);
+        serverUrl.setEnabled(!isLocked);
+
+        if (isLocked) {
+            setPreferenceValueSummary(KEY_SERVER_URL,
+                    AppGlobal.preferences.getString(KEY_SERVER_URL_SUMMARY, "")
+            );
+        } else {
+            setPreferenceValueSummary(KEY_SERVER_URL, (String) null);
+        }
 
         Preference newsKey = Objects.requireNonNull(findPreference(KEY_NEWS_KEY));
         setPreferenceValueSummary(KEY_NEWS_KEY, (String) null);
@@ -107,6 +131,32 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
                         (String) newValue
                 );
 
+                String en = AppGlobal.preferences.getString(KEY_SERVER_URL_SUMMARY_EN, "");
+                String ru = AppGlobal.preferences.getString(KEY_SERVER_URL_SUMMARY_RU, "");
+                String uk = AppGlobal.preferences.getString(KEY_SERVER_URL_SUMMARY_UK, "");
+
+                Locale currentLocale = LocaleUtils.getCurrentLocale(requireContext());
+
+                String strLocale = currentLocale.toString();
+
+                String serverSummary = "";
+
+                switch (strLocale) {
+                    case "en":
+                        serverSummary = en;
+                        break;
+                    case "ru":
+                        serverSummary = ru;
+                        break;
+                    case "uk":
+                        serverSummary = uk;
+                        break;
+                }
+
+                AppGlobal.preferences.edit()
+                        .putString(KEY_SERVER_URL_SUMMARY, serverSummary)
+                        .apply();
+
                 AppGlobal.updateLocale(requireActivity().getBaseContext(), (String) newValue);
 //                LocaleHelper.setLocale(requireContext(), (String) newValue);
                 restartActivities();
@@ -132,9 +182,9 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
 
     @SuppressLint("PrivateResource")
     private void restartActivities() {
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(requireContext())
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(requireActivity().getApplicationContext())
                 .addNextIntent(new Intent(requireContext(), MainActivity.class))
-                .addNextIntent(requireActivity().getIntent());
+                .addNextIntent(new Intent(requireContext(), SettingsActivity.class));
 
         requireActivity().finishAffinity();
 

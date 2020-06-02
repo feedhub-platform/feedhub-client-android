@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.preference.PreferenceManager;
 
@@ -30,8 +31,8 @@ public class LocaleUtils {
         }
     }
 
-    public static void updateConfiguration(Application application, Configuration configuration){
-        if(mLocale != null){
+    public static void updateConfiguration(Application application, Configuration configuration) {
+        if (mLocale != null) {
             Configuration config = new Configuration(configuration);
             config.locale = mLocale;
             Resources res = application.getBaseContext().getResources();
@@ -69,4 +70,10 @@ public class LocaleUtils {
         editor.putString("country_code", mPrefCountryCode);
         editor.apply();
     }
+
+    @NonNull
+    public static Locale getCurrentLocale(@NonNull Context context) {
+        return context.getResources().getConfiguration().locale;
+    }
+
 }

@@ -25,8 +25,7 @@ public class SettingsActivity extends BaseActivity {
 
         ButterKnife.bind(this);
 
-        setSupportActionBar(toolbar);
-
+        toolbar.setTitle(R.string.navigation_settings);
         toolbar.setNavigationIcon(R.drawable.ic_arrow_back);
         toolbar.setNavigationOnBackClickListener(this);
 

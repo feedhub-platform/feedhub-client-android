@@ -1,23 +1,21 @@
 package com.feedhub.app.item;
 
-import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.Ignore;
-import androidx.room.PrimaryKey;
 
 @Entity(tableName = "favorites")
-public class Favorite {
+public class Favorite extends News {
 
-    @NonNull
-    @PrimaryKey
-    public String id = "";
-
-    public String title;
-    public String body;
-    public String picture;
-    public String language;
-    public String originTitle;
-    public String originUrl;
+//    @NonNull
+//    @PrimaryKey
+//    public String id = "";
+//
+//    public String title;
+//    public String body;
+//    public String picture;
+//    public String language;
+//    public String originTitle;
+//    public String originUrl;
 
     public Favorite() {
     }

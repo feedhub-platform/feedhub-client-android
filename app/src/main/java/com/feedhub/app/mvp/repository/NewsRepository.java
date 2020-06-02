@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -32,40 +33,40 @@ public class NewsRepository extends MvpRepository<News> {
         int offset = fields.getNonNull(MvpConstants.OFFSET);
         int count = fields.getNonNull(MvpConstants.COUNT);
 
-        Set<String> languages = AppGlobal.preferences.getStringSet(FragmentSettings.KEY_NEWS_LANGUAGE, null);
+        Set<String> languages = AppGlobal.preferences.getStringSet(FragmentSettings.KEY_NEWS_LANGUAGE, new HashSet<>());
 
-        if (languages == null) return;
+        String method = prefs.getString(FragmentSettings.KEY_NEWS_KEY, FragmentSettings.KEY_NEWS_KEY_DV);
 
-        RequestBuilder builder = RequestBuilder.create();
-        builder.put("offset", offset);
-        builder.put("limit", count);
-        builder.put("language", ArrayUtils.toString(new ArrayList<>(languages)));
-        builder.method(prefs.getString(FragmentSettings.KEY_NEWS_KEY, ""));
-        builder.execute(new RequestBuilder.OnResponseListener<JSONObject>() {
-            @Override
-            public void onSuccess(JSONObject root) {
-                try {
-                    JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-                    JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
+        RequestBuilder.create()
+                .put("offset", offset)
+                .put("limit", count)
+                .put("language", ArrayUtils.toString(new ArrayList<>(languages)))
+                .method(method)
+                .execute(new RequestBuilder.OnResponseListener<JSONObject>() {
+                    @Override
+                    public void onSuccess(JSONObject root) {
+                        try {
+                            JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+                            JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
 
-                    final ArrayList<News> news = new ArrayList<>();
+                            final ArrayList<News> news = new ArrayList<>();
 
-                    for (int i = 0; i < items.length(); i++) {
-                        news.add(new News(items.optJSONObject(i)));
+                            for (int i = 0; i < items.length(); i++) {
+                                news.add(new News(items.optJSONObject(i)));
+                            }
+
+                            cacheLoadedValues(news);
+                            sendValues(fields, news, listener);
+                        } catch (Exception e) {
+                            sendError(listener, e);
+                        }
                     }
 
-                    cacheLoadedValues(news);
-                    sendValues(fields, news, listener);
-                } catch (Exception e) {
-                    sendError(listener, e);
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                sendError(listener, e);
-            }
-        });
+                    @Override
+                    public void onError(Exception e) {
+                        sendError(listener, e);
+                    }
+                });
     }
 
     @Override

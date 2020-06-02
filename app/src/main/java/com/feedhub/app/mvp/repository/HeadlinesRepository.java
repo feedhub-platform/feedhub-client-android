@@ -27,7 +27,7 @@ public class HeadlinesRepository extends MvpRepository<Headline> {
 
     public void loadTopics(@Nullable MvpOnLoadListener<ArrayMap<String, ArrayList<Topic>>> listener) {
         RequestBuilder.create()
-                .method(prefs.getString(FragmentSettings.KEY_TOPICS_KEY, ""))
+                .method(prefs.getString(FragmentSettings.KEY_TOPICS_KEY, FragmentSettings.KEY_TOPICS_KEY_DV))
                 .execute(new RequestBuilder.OnResponseListener<JSONObject>() {
                     @Override
                     public void onSuccess(JSONObject root) {
@@ -88,7 +88,7 @@ public class HeadlinesRepository extends MvpRepository<Headline> {
         if (sourceId != null) {
             builder.method("platform/sources/" + sourceId);
         } else {
-            builder.method(prefs.getString(FragmentSettings.KEY_CATEGORY_KEY, ""));
+            builder.method(prefs.getString(FragmentSettings.KEY_CATEGORY_KEY, FragmentSettings.KEY_CATEGORY_KEY_DV));
         }
 
         builder.execute(new RequestBuilder.OnResponseListener<JSONObject>() {

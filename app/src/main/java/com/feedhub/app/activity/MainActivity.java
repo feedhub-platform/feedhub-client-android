@@ -9,16 +9,26 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.feedhub.app.R;
+import com.feedhub.app.common.AppGlobal;
+import com.feedhub.app.common.TaskManager;
 import com.feedhub.app.current.BaseActivity;
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.fragment.FragmentFavorites;
 import com.feedhub.app.fragment.FragmentHeadlines;
 import com.feedhub.app.fragment.FragmentNews;
+import com.feedhub.app.fragment.FragmentSettings;
 import com.feedhub.app.fragment.FragmentSources;
 import com.feedhub.app.fragment.FragmentSubscriptions;
+import com.feedhub.app.net.NetUtils;
+import com.feedhub.app.net.RequestBuilder;
+import com.feedhub.app.util.LocaleUtils;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import org.json.JSONObject;
+
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -44,9 +54,77 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
 
         prepareBottomNavView();
 
-        prepareFragments();
+        sendRequest();
+    }
 
-        replaceFragment(fragmentNews);
+    public void sendRequest() {
+        TaskManager.execute(() -> {
+            String link = "https://api.innomaxx.dev/feedhub/relay";
+
+            RequestBuilder.create()
+                    .baseUrl(link)
+                    .execute(new RequestBuilder.OnResponseListener<JSONObject>() {
+
+                        @Override
+                        public void onSuccess(JSONObject response) {
+                            try {
+                                String baseUrl = response.optString("baseUrl");
+
+                                boolean isLocked = response.optBoolean("isLocked", true);
+
+                                AppGlobal.preferences.edit().putBoolean(FragmentSettings.KEY_SERVER_URL_BLOCKED, isLocked).apply();
+
+                                JSONObject title = Objects.requireNonNull(response.optJSONObject("title"));
+
+                                String en = title.optString("en", "");
+                                String ru = title.optString("ru", "");
+                                String uk = title.optString("uk", "");
+
+                                String transformedUrl = NetUtils.transformUrl(baseUrl);
+
+                                Locale currentLocale = LocaleUtils.getCurrentLocale(MainActivity.this);
+
+                                String strLocale = currentLocale.toString();
+
+                                String serverSummary = "";
+
+                                switch (strLocale) {
+                                    case "en":
+                                        serverSummary = en;
+                                        break;
+                                    case "ru":
+                                        serverSummary = ru;
+                                        break;
+                                    case "uk":
+                                        serverSummary = uk;
+                                        break;
+                                }
+
+                                AppGlobal.preferences.edit()
+                                        .putString(FragmentSettings.KEY_SERVER_URL_SUMMARY, serverSummary)
+                                        .putString(FragmentSettings.KEY_SERVER_URL_SUMMARY_EN, en)
+                                        .putString(FragmentSettings.KEY_SERVER_URL_SUMMARY_RU, ru)
+                                        .putString(FragmentSettings.KEY_SERVER_URL_SUMMARY_UK, uk)
+                                        .putString(FragmentSettings.KEY_SERVER_URL, transformedUrl)
+                                        .apply();
+
+                                RequestBuilder.updateBaseUrl(transformedUrl);
+
+                                runOnUiThread(() -> {
+                                    prepareFragments();
+                                    replaceFragment(fragmentNews);
+                                });
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        @Override
+                        public void onError(Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+        });
     }
 
     private void prepareFragments() {

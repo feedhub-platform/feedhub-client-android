@@ -24,5 +24,6 @@
     <string name="ukrainian">"Украинский"</string>
     <string name="preference_language_title">"Язык приложения"</string>
     <string name="preference_news_language_title">"Язык новостей"</string>
-    <string name="chrome_tabs_add_to_favorites">в Избранные</string>
+    <string name="chrome_tabs_add_to_favorites">"в Избранные"</string>
+    <string name="preference_about">"О приложении"</string>
 </resources>
