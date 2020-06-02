@@ -5,9 +5,12 @@ import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class News implements Serializable {
@@ -39,5 +42,16 @@ public class News implements Serializable {
             originTitle = origin.optString("title");
             originUrl = origin.optString("url");
         }
+    }
+
+    @NonNull
+    public static List<News> parse(JSONArray jsonArray) {
+        List<News> list = new ArrayList<>();
+
+        for (int i = 0; i < jsonArray.length(); i++) {
+            list.add(new News(jsonArray.optJSONObject(i)));
+        }
+
+        return list;
     }
 }

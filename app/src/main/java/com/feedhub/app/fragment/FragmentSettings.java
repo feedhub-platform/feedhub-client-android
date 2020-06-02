@@ -16,8 +16,10 @@ import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.net.RequestBuilder;
 import com.feedhub.app.util.Utils;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class FragmentSettings extends PreferenceFragmentCompat implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
 
@@ -33,24 +35,25 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
         setPreferencesFromResource(R.xml.fragment_settings, rootKey);
 
         Preference serverUrl = Objects.requireNonNull(findPreference(KEY_SERVER_URL));
-        setPreferenceValueSummary(KEY_SERVER_URL, null);
+        setPreferenceValueSummary(KEY_SERVER_URL, (String) null);
 
         Preference newsKey = Objects.requireNonNull(findPreference(KEY_NEWS_KEY));
-        setPreferenceValueSummary(KEY_NEWS_KEY, null);
+        setPreferenceValueSummary(KEY_NEWS_KEY, (String) null);
         newsKey.setEnabled(false);
 
         Preference categoryKey = Objects.requireNonNull(findPreference(KEY_CATEGORY_KEY));
-        setPreferenceValueSummary(KEY_CATEGORY_KEY, null);
+        setPreferenceValueSummary(KEY_CATEGORY_KEY, (String) null);
         categoryKey.setEnabled(false);
 
         Preference topicsKey = Objects.requireNonNull(findPreference(KEY_TOPICS_KEY));
-        setPreferenceValueSummary(KEY_TOPICS_KEY, null);
+        setPreferenceValueSummary(KEY_TOPICS_KEY, (String) null);
         topicsKey.setEnabled(false);
 
         Preference language = Objects.requireNonNull(findPreference(KEY_LANGUAGE));
-        setPreferenceValueSummary(KEY_LANGUAGE, null);
+        setPreferenceValueSummary(KEY_LANGUAGE, (String) null);
 
         Preference newsLanguage = Objects.requireNonNull(findPreference(KEY_NEWS_LANGUAGE));
+        setPreferenceValueSummary(KEY_NEWS_LANGUAGE, (Set<String>) null);
 
         serverUrl.setOnPreferenceChangeListener(this);
         newsKey.setOnPreferenceChangeListener(this);
@@ -92,6 +95,18 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
                 return true;
             case KEY_NEWS_LANGUAGE:
                 HashSet<String> values = (HashSet<String>) newValue;
+
+                if (values.isEmpty()) {
+                    String[] languages = getResources().getStringArray(R.array.languages_values);
+
+                    values = new HashSet<>(Arrays.asList(languages));
+
+                    AppGlobal.preferences.edit()
+                            .putStringSet(preference.getKey(), values)
+                            .apply();
+                }
+
+                setPreferenceValueSummary(preference.getKey(), values);
                 return true;
         }
         return false;
@@ -108,6 +123,26 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
         stackBuilder.startActivities();
 
         requireActivity().overridePendingTransition(R.anim.abc_fade_in, R.anim.abc_fade_out);
+    }
+
+    private void setPreferenceValueSummary(@NonNull String key, @Nullable Set<String> values) {
+        StringBuilder builder = new StringBuilder();
+
+        if (values == null) values = AppGlobal.preferences.getStringSet(key, null);
+        if (values == null || values.isEmpty()) return;
+
+        Object[] strings = values.toArray();
+
+        builder.append(strings[0]);
+
+        if (values.size() > 1) {
+            for (int i = 1; i < strings.length; i++) {
+                builder.append(", ");
+                builder.append(strings[i]);
+            }
+        }
+
+        setPreferenceSummary(key, builder.toString());
     }
 
     private void setPreferenceValueSummary(@NonNull String key, @Nullable String value) {

@@ -2,6 +2,7 @@ package com.feedhub.app.activity;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
@@ -12,8 +13,13 @@ import com.feedhub.app.R;
 import com.feedhub.app.adapter.NewsAdapter;
 import com.feedhub.app.fragment.FragmentNews;
 import com.feedhub.app.item.News;
+import com.feedhub.app.net.RequestBuilder;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,7 +57,8 @@ public class SearchActivity extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                return false;
+                search(query);
+                return true;
             }
 
             @Override
@@ -75,5 +82,34 @@ public class SearchActivity extends AppCompatActivity {
         adapter.setOnMoreClickListener((view, position) -> FragmentNews.showMoreItems(adapter, position, SearchActivity.this, view));
         adapter.setOnItemClickListener(position -> FragmentNews.openNewsPost(adapter, position, SearchActivity.this));
         recyclerView.setAdapter(adapter);
+    }
+
+    private void search(@NonNull String query) {
+        RequestBuilder.create()
+                .method("news/search")
+                .put("query", query.toLowerCase())
+                .put("limit", 30)
+                .execute(new RequestBuilder.OnResponseListener<JSONObject>() {
+                    @Override
+                    public void onSuccess(JSONObject root) {
+                        try {
+                            JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+                            JSONArray results = Objects.requireNonNull(response.optJSONArray("results"));
+
+                            ArrayList<News> news = new ArrayList<>(News.parse(results));
+                            runOnUiThread(() -> {
+                                adapter.changeItems(news);
+                                adapter.notifyDataSetChanged();
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 }
