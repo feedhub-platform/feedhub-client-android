@@ -22,6 +22,7 @@
     <string name="english">"English"</string>
     <string name="russian">"Russian"</string>
     <string name="ukrainian">"Ukrainian"</string>
-    <string name="preference_language_title">"Language"</string>
-    <string name="preference_news_language_title">News languages</string>
+    <string name="preference_language_title">"App language"</string>
+    <string name="preference_news_language_title">"News languages"</string>
+    <string name="chrome_tabs_add_to_favorites">add to Favorites</string>
 </resources>

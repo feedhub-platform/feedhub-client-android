@@ -14,7 +14,9 @@ import com.facebook.drawee.view.SimpleDraweeView;
 import com.feedhub.app.R;
 import com.feedhub.app.current.BaseAdapter;
 import com.feedhub.app.current.BaseHolder;
+import com.feedhub.app.item.BaseNewsItem;
 import com.feedhub.app.item.News;
+import com.feedhub.app.item.Search;
 import com.feedhub.app.util.StringUtils;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
@@ -25,11 +27,13 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class NewsAdapter extends BaseAdapter<News, BaseHolder> {
+public class NewsAdapter extends BaseAdapter<BaseNewsItem, BaseHolder> {
+
+    private static final int TYPE_SEARCH = 2001;
 
     private OnMoreClickListener onMoreClickListener;
 
-    public NewsAdapter(@NonNull Context context, @NonNull ArrayList<News> values) {
+    public NewsAdapter(@NonNull Context context, @NonNull ArrayList<BaseNewsItem> values) {
         super(context, values);
     }
 
@@ -40,6 +44,7 @@ public class NewsAdapter extends BaseAdapter<News, BaseHolder> {
     @Override
     public int getItemViewType(int position) {
         if (getItem(position) == null) return TYPE_LOADING;
+        if (getItem(position) instanceof Search) return TYPE_SEARCH;
 
         return super.getItemViewType(position);
     }
@@ -49,17 +54,38 @@ public class NewsAdapter extends BaseAdapter<News, BaseHolder> {
     public BaseHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == TYPE_LOADING) return new LoadingHolder(view(R.layout.item_loading, parent));
 
+        if (viewType == TYPE_SEARCH) return new ItemSearch(view(R.layout.item_search, parent));
+
         return new ItemHolder(view(R.layout.item_news, parent));
     }
 
     @Override
-    public boolean onQueryItem(@NonNull News item, @NonNull String lowerQuery) {
+    public boolean onQueryItem(@NonNull BaseNewsItem item, @NonNull String lowerQuery) {
         return item.title.toLowerCase().contains(lowerQuery) ||
                 item.body.toLowerCase().contains(lowerQuery);
     }
 
     public interface OnMoreClickListener {
         void onClick(View view, int position);
+    }
+
+    class ItemSearch extends BaseHolder {
+
+        @BindView(R.id.searchQuery)
+        TextView query;
+
+        ItemSearch(@NonNull View v) {
+            super(v);
+
+            ButterKnife.bind(this, v);
+        }
+
+        @Override
+        public void bind(int position) {
+            Search item = (Search) getItem(position);
+
+            query.setText(item.query);
+        }
     }
 
     class ItemHolder extends BaseHolder {
@@ -104,7 +130,7 @@ public class NewsAdapter extends BaseAdapter<News, BaseHolder> {
         public void bind(int position) {
             currentPosition = position;
 
-            News item = getItem(position);
+            News item = (News) getItem(position);
 
             language.setText(item.language.toUpperCase());
 

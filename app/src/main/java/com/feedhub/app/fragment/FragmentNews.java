@@ -12,7 +12,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.PopupMenu;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -73,7 +72,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
     public static void openNewsPost(@NonNull NewsAdapter adapter, int position, @NonNull Activity activity) {
         FavoritesDao favoritesDao = AppGlobal.database.favoritesDao();
 
-        News news = adapter.getItem(position);
+        News news = (News) adapter.getItem(position);
 
         TaskManager.execute(() -> {
             boolean contains = false;
@@ -92,7 +91,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
             activity.runOnUiThread(() -> {
                 String label = "FeedHub: ";
 
-                label += activity.getString(finalContains ? R.string.remove_from_favorites : R.string.add_to_favorites);
+                label += activity.getString(finalContains ? R.string.remove_from_favorites : R.string.chrome_tabs_add_to_favorites);
 
                 Intent intent = new Intent(activity, TaskActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -106,22 +105,14 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
                         PendingIntent.FLAG_IMMUTABLE
                 );
 
-                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                builder.setMessage(R.string.open_post_confirmation);
+                CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
+                        .addDefaultShareMenuItem()
+                        .setShowTitle(true)
+                        .addMenuItem(label, pendingIntent)
+                        .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
+                        .build();
 
-                String finalLabel = label;
-                builder.setPositiveButton(R.string.dialog_yes, (dialog, which) -> {
-                    CustomTabsIntent customTabsIntent = new CustomTabsIntent.Builder()
-                            .addDefaultShareMenuItem()
-                            .setShowTitle(true)
-                            .addMenuItem(finalLabel, pendingIntent)
-                            .setColorScheme(CustomTabsIntent.COLOR_SCHEME_SYSTEM)
-                            .build();
-
-                    customTabsIntent.launchUrl(activity, Uri.parse(news.originUrl));
-                });
-                builder.setNegativeButton(R.string.dialog_no, null);
-                builder.show();
+                customTabsIntent.launchUrl(activity, Uri.parse(news.originUrl));
             });
         });
     }
@@ -129,7 +120,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
     public static void showMoreItems(@NonNull NewsAdapter adapter, int position, @NonNull Activity activity, @NonNull View view) {
         FavoritesDao favoritesDao = AppGlobal.database.favoritesDao();
 
-        News news = adapter.getItem(position);
+        News news = (News) adapter.getItem(position);
 
         TaskManager.execute(() -> {
             boolean contains = false;
@@ -285,37 +276,11 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
             @Override
             public void onLoadMore() {
                 adapter.add(null);
-//                adapter.notifyItemInserted(adapter.getItemCount() - 1);
-
-//                if (!recyclerView.isComputingLayout())
-//                    adapter.notifyDataSetChanged();
 
                 presenter.requestLoadValues(new MvpFields()
                         .put(MvpConstants.FROM_CACHE, false)
                         .put(MvpConstants.COUNT, 30)
                         .put(MvpConstants.OFFSET, adapter.getItemCount()));
-
-//                AppGlobal.handler.postDelayed(() -> {
-//                    adapter.remove(adapter.getItemCount() - 1);
-//
-//                    int scrollPosition = adapter.getItemCount();
-//
-//                    adapter.notifyItemRemoved(scrollPosition);
-//
-//                    int currentSize = scrollPosition;
-//                    int nextLimit = currentSize + 10;
-//
-//                    int i = 0;
-//
-//                    while (currentSize - 1 < nextLimit) {
-//                        adapter.add(adapter.getValues().get(i));
-//                        currentSize++;
-//                        i++;
-//                    }
-//
-//                    adapter.notifyDataSetChanged();
-//                    onLoadEndListener.onLoadEnd();
-//                }, 2000);
             }
         });
     }
@@ -414,7 +379,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
         int offset = fields.getInt(MvpConstants.OFFSET);
 
         if (adapter == null) {
-            adapter = new NewsAdapter(requireContext(), values);
+            adapter = new NewsAdapter(requireContext(), new ArrayList<>(values));
             adapter.setOnItemClickListener(this);
             adapter.setOnMoreClickListener(this::showMoreItems);
 
@@ -429,7 +394,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
         }
 
         if (offset > 0) {
-            adapter.addAll(values);
+            adapter.addAll(new ArrayList<>(values));
             adapter.notifyDataSetChanged();
             return;
         }
@@ -438,7 +403,7 @@ public class FragmentNews extends BaseFragment implements NewsView, SwipeRefresh
             recyclerView.setAdapter(adapter);
         }
 
-        adapter.changeItems(values);
+        adapter.changeItems(new ArrayList<>(values));
         adapter.notifyDataSetChanged();
     }
 

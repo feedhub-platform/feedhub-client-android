@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.feedhub.app.R;
-import com.feedhub.app.adapter.HeadlineAdapter;
+import com.feedhub.app.adapter.NewsAdapter;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.current.BaseFragment;
 import com.feedhub.app.item.News;
@@ -31,7 +31,7 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener {
+public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshLayout.OnRefreshListener, NewsAdapter.OnItemClickListener {
 
     @BindView(R.id.refreshLayout)
     SwipeRefreshLayout refreshLayout;
@@ -45,11 +45,13 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
     private String categoryTitle;
     private String categoryId;
     private ArrayList<Topic> topics;
-    private int lastCheckedId;
+
+    private int lastCheckedId = -1;
 
     private String selectedTopic = "";
 
-    private HeadlineAdapter adapter;
+    private NewsAdapter adapter;
+
 
     public static FragmentHeadlinesItem newInstance(String id, String title, ArrayList<Topic> topics) {
         FragmentHeadlinesItem fragment = new FragmentHeadlinesItem();
@@ -130,13 +132,14 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
         chipGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == -1) {
-                checkedId = lastCheckedId;
-                ((Chip) chipGroup.findViewById(checkedId)).setChecked(true);
+                ((Chip) chipGroup.findViewById(lastCheckedId)).setChecked(false);
+                lastCheckedId = -1;
+                selectedTopic = "";
             } else {
                 lastCheckedId = checkedId;
+                selectedTopic = topics.get(checkedId).id;
             }
 
-            selectedTopic = topics.get(checkedId).id;
             loadData();
         });
     }
@@ -170,30 +173,6 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
                 parentFragment().hideProgressBar();
             }
         });
-//        TaskManager.execute(() -> {
-//            try {
-//                String serverUrl = AppGlobal.preferences.getString(FragmentSettings.KEY_SERVER_URL, "") + "/" +
-//                        AppGlobal.preferences.getString(FragmentSettings.KEY_NEWS_KEY, "") + "?category=" + categoryId + "&topic=" + selectedTopic;
-//
-//                JSONObject root = new JSONObject(HttpRequest.get(serverUrl).asString());
-//                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-//                JSONArray items = Objects.requireNonNull(response.optJSONArray("items"));
-//
-//                ArrayList<News> news = new ArrayList<>();
-//
-//                for (int i = 0; i < items.length(); i++) {
-//                    news.add(new News(items.optJSONObject(i)));
-//                }
-//
-//                AppGlobal.handler.post(() -> {
-//                    createAdapter(news);
-//
-//                    if (refreshLayout.isRefreshing()) refreshLayout.setRefreshing(false);
-//                });
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        });
     }
 
     private void prepareRefreshLayout() {
@@ -207,14 +186,17 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
     private void createAdapter(ArrayList<News> news) {
         if (adapter == null) {
-            adapter = new HeadlineAdapter(requireContext(), news);
+            adapter = new NewsAdapter(requireContext(), new ArrayList<>(news));
             recyclerView.setAdapter(adapter);
+
+            adapter.setOnItemClickListener(this);
+            adapter.setOnMoreClickListener(this::onMoreClick);
 
             parentFragment().hideProgressBar();
             return;
         }
 
-        adapter.changeItems(news);
+        adapter.changeItems(new ArrayList<>(news));
         adapter.notifyDataSetChanged();
     }
 
@@ -228,4 +210,14 @@ public class FragmentHeadlinesItem extends BaseFragment implements SwipeRefreshL
 
         loadData();
     }
+
+    private void onMoreClick(View view, int position) {
+        FragmentNews.showMoreItems(adapter, position, requireActivity(), view);
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        FragmentNews.openNewsPost(adapter, position, requireActivity());
+    }
+
 }

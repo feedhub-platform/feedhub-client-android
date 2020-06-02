@@ -104,13 +104,6 @@ public class FragmentSources extends BaseFragment implements SourcesView, Source
                 new Intent(requireContext(), SourcesActivity.class)
                         .putExtra("sourceId", source.id)
         );
-
-//        Bundle arguments = new Bundle();
-//        arguments.putString("sourceId", source.id);
-//
-//        MainActivity activity = (MainActivity) requireActivity();
-//        activity.getNavigationView().setSelectedItemId(R.id.navigationHeadlines);
-//        activity.replaceFragment(activity.fragmentHeadlines, arguments);
     }
 
     @Override

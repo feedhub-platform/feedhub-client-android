@@ -14,10 +14,10 @@ import java.util.List;
 @Dao
 public interface FavoritesDao {
 
-    @Query("SELECT * FROM favorite")
+    @Query("SELECT * FROM favorites")
     List<Favorite> getAll();
 
-    @Query("SELECT * FROM favorite WHERE id = :id")
+    @Query("SELECT * FROM favorites WHERE id = :id")
     Favorite getById(String id);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -29,10 +29,10 @@ public interface FavoritesDao {
     @Delete
     void delete(Favorite favorite);
 
-    @Query("DELETE FROM favorite WHERE id = :id")
+    @Query("DELETE FROM favorites WHERE id = :id")
     void deleteById(String id);
 
-    @Query("DELETE FROM favorite")
+    @Query("DELETE FROM favorites")
     void clear();
 
 }

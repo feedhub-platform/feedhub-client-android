@@ -11,14 +11,20 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.feedhub.app.R;
 import com.feedhub.app.adapter.NewsAdapter;
+import com.feedhub.app.common.AppGlobal;
+import com.feedhub.app.common.TaskManager;
+import com.feedhub.app.dao.SearchesDao;
 import com.feedhub.app.fragment.FragmentNews;
 import com.feedhub.app.item.News;
+import com.feedhub.app.item.Search;
 import com.feedhub.app.net.RequestBuilder;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -34,6 +40,8 @@ public class SearchActivity extends AppCompatActivity {
 
     private ArrayList<News> items;
     private NewsAdapter adapter;
+
+    private SearchesDao searchesDao = AppGlobal.database.searchesDao();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,6 +74,10 @@ public class SearchActivity extends AppCompatActivity {
                 if (adapter == null) return false;
 
                 adapter.filter(newText.toLowerCase());
+
+                if (adapter.isEmpty()) {
+                    showSearchHistory();
+                }
                 return true;
             }
         });
@@ -78,13 +90,31 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void createAdapter() {
-        adapter = new NewsAdapter(this, items);
+        adapter = new NewsAdapter(this, new ArrayList<>(items));
         adapter.setOnMoreClickListener((view, position) -> FragmentNews.showMoreItems(adapter, position, SearchActivity.this, view));
         adapter.setOnItemClickListener(position -> FragmentNews.openNewsPost(adapter, position, SearchActivity.this));
         recyclerView.setAdapter(adapter);
     }
 
     private void search(@NonNull String query) {
+        TaskManager.execute(() -> {
+            try {
+                searchesDao.insert(new Search(query));
+
+                List<Search> searches = searchesDao.getAll();
+
+                if (searches.isEmpty()) return;
+
+                if (searches.size() > 5) {
+                    searches = searches.subList(searches.size() - 5, searches.size());
+                    searchesDao.clear();
+                    searchesDao.insert(searches);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
         RequestBuilder.create()
                 .method("news/search")
                 .put("query", query.toLowerCase())
@@ -92,18 +122,18 @@ public class SearchActivity extends AppCompatActivity {
                 .execute(new RequestBuilder.OnResponseListener<JSONObject>() {
                     @Override
                     public void onSuccess(JSONObject root) {
-                        try {
-                            JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
-                            JSONArray results = Objects.requireNonNull(response.optJSONArray("results"));
+                        TaskManager.execute(() -> {
+                            try {
+                                JSONObject response = Objects.requireNonNull(root.optJSONObject("response"));
+                                JSONArray results = Objects.requireNonNull(response.optJSONArray("results"));
 
-                            ArrayList<News> news = new ArrayList<>(News.parse(results));
-                            runOnUiThread(() -> {
-                                adapter.changeItems(news);
-                                adapter.notifyDataSetChanged();
-                            });
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                                ArrayList<News> news = new ArrayList<News>(News.parse(results));
+
+                                runOnUiThread(() -> updateList(news));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        });
                     }
 
                     @Override
@@ -111,5 +141,32 @@ public class SearchActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 });
+    }
+
+    private void updateList(@NonNull ArrayList<News> values) {
+        if (values.isEmpty()) {
+            showSearchHistory();
+            return;
+        }
+
+        adapter.changeItems(new ArrayList<>(values));
+        adapter.notifyDataSetChanged();
+    }
+
+    private void showSearchHistory() {
+        TaskManager.execute(() -> {
+            try {
+                List<Search> searches = searchesDao.getAll();
+                Collections.reverse(searches);
+
+                runOnUiThread(() -> {
+                    adapter.clear();
+                    adapter.getValues().addAll(searches);
+                    adapter.notifyDataSetChanged();
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

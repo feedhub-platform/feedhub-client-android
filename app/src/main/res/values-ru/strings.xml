@@ -21,6 +21,8 @@
     <string name="dialog_no">"Нет"</string>
     <string name="english">"Английский"</string>
     <string name="russian">"Русский"</string>
-    <string name="ukrainian">Украинский</string>
-    <string name="preference_language_title">Язык</string>
+    <string name="ukrainian">"Украинский"</string>
+    <string name="preference_language_title">"Язык приложения"</string>
+    <string name="preference_news_language_title">"Язык новостей"</string>
+    <string name="chrome_tabs_add_to_favorites">в Избранные</string>
 </resources>

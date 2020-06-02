@@ -8,26 +8,17 @@ import androidx.room.PrimaryKey;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-public class News implements Serializable {
+public class News extends BaseNewsItem {
 
     @NonNull
     @PrimaryKey
     public String id = "";
 
-    public String title;
-    public String body;
-    public String picture;
-    public String language;
-    public String originTitle;
-    public String originUrl;
-
-    public News() {
-    }
+    public News() {}
 
     @Ignore
     public News(JSONObject o) {
@@ -54,4 +45,5 @@ public class News implements Serializable {
 
         return list;
     }
+
 }

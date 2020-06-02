@@ -14,6 +14,7 @@ import com.feedhub.app.R;
 import com.feedhub.app.activity.MainActivity;
 import com.feedhub.app.common.AppGlobal;
 import com.feedhub.app.net.RequestBuilder;
+import com.feedhub.app.util.StringUtils;
 import com.feedhub.app.util.Utils;
 
 import java.util.Arrays;
@@ -39,15 +40,15 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
 
         Preference newsKey = Objects.requireNonNull(findPreference(KEY_NEWS_KEY));
         setPreferenceValueSummary(KEY_NEWS_KEY, (String) null);
-        newsKey.setEnabled(false);
+        newsKey.setVisible(false);
 
         Preference categoryKey = Objects.requireNonNull(findPreference(KEY_CATEGORY_KEY));
         setPreferenceValueSummary(KEY_CATEGORY_KEY, (String) null);
-        categoryKey.setEnabled(false);
+        categoryKey.setVisible(false);
 
         Preference topicsKey = Objects.requireNonNull(findPreference(KEY_TOPICS_KEY));
         setPreferenceValueSummary(KEY_TOPICS_KEY, (String) null);
-        topicsKey.setEnabled(false);
+        topicsKey.setVisible(false);
 
         Preference language = Objects.requireNonNull(findPreference(KEY_LANGUAGE));
         setPreferenceValueSummary(KEY_LANGUAGE, (String) null);
@@ -72,7 +73,24 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
     @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
         if (preference.getKey().equals(KEY_SERVER_URL)) {
-            RequestBuilder.updateBaseUrl((String) newValue);
+            String url = (String) newValue;
+
+            if (url.isEmpty()) return false;
+
+            String s = url.substring(url.length() - 1);
+
+            if (!s.equals("/")) {
+                url += "/";
+
+                AppGlobal.preferences.edit()
+                        .putString(preference.getKey(), url)
+                        .apply();
+            }
+
+            setPreferenceValueSummary(preference.getKey(), url);
+
+            RequestBuilder.updateBaseUrl(url);
+            return false;
         }
 
         switch (preference.getKey()) {
@@ -133,12 +151,12 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
 
         Object[] strings = values.toArray();
 
-        builder.append(strings[0]);
+        builder.append(StringUtils.getLanguageByCode(requireContext(), (String) strings[0]));
 
         if (values.size() > 1) {
             for (int i = 1; i < strings.length; i++) {
                 builder.append(", ");
-                builder.append(strings[i]);
+                builder.append(StringUtils.getLanguageByCode(requireContext(), (String) strings[i]));
             }
         }
 
@@ -147,6 +165,9 @@ public class FragmentSettings extends PreferenceFragmentCompat implements Prefer
 
     private void setPreferenceValueSummary(@NonNull String key, @Nullable String value) {
         String summary = (value == null ? AppGlobal.preferences.getString(key, "") : value).trim();
+
+        if (key.equals(KEY_LANGUAGE))
+            summary = StringUtils.getLanguageByCode(requireContext(), summary);
 
         setPreferenceSummary(key, summary);
     }

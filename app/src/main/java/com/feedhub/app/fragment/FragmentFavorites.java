@@ -140,6 +140,13 @@ public class FragmentFavorites extends BaseFragment implements FavoritesView, Sw
     }
 
     @Override
+    public void onHiddenChanged(boolean hidden) {
+        if (!hidden) {
+            loadData();
+        }
+    }
+
+    @Override
     public void prepareNoInternetView() {
 
     }

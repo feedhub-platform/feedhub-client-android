@@ -25,8 +25,5 @@ public class SourcesActivity extends AppCompatActivity {
                         FragmentHeadlines.class.getSimpleName()
                 )
                 .commitNow();
-
-
-//        fragmentHeadlines.setArguments(args);
     }
 }
